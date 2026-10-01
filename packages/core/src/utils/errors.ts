@@ -1,8 +1,8 @@
 /**
  * Erro de dominio: a entrada violou uma regra de negocio ou um limite fisico.
  *
- * O dominio nao conhece HTTP. A camada de transporte (Fastify) traduz isso
- * para 422 no error handler global - ver `apps/api/src/middleware/error-handler.ts`.
+ * O dominio nao conhece HTTP. A camada de transporte (Express) traduz isso
+ * para 422 no error handler global - ver `apps/api/src/http/error-handler.ts`.
  */
 export class DomainError extends Error {
   readonly code: string;

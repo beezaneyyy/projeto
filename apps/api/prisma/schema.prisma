@@ -2,9 +2,9 @@
 //
 // Convencoes:
 //  - Ids sao UUID gerados pelo Postgres (gen_random_uuid, extensao pgcrypto).
-//  - `User.id` e o MESMO uuid de `auth.users.id` do Supabase. Nao ha tabela de
-//    senha aqui: autenticacao e responsabilidade do Supabase Auth, e o backend
-//    apenas valida o JWT. Isso mantem credenciais fora do nosso banco.
+//  - Autenticacao propria: `users` guarda o e-mail e o HASH da senha (scrypt,
+//    nunca a senha). A API emite o JWT; `token_version` invalida tokens antigos
+//    (troca de senha, logout geral, exclusao de conta).
 //  - Valores nutricionais em Float. Precisao decimal exata nao importa em
 //    nutricao (a fonte do dado ja tem +/-10% de erro) e Decimal do Prisma
 //    forcaria conversao manual em todo o codigo TypeScript.
@@ -216,12 +216,9 @@ enum ProgressMetric {
   thigh_cm
 }
 
+/// Chamadas ao servico de IA (Python). Hoje so a analise de foto usa IA.
 enum AiOperation {
   analyze_meal_image
-  generate_meal_plan
-  generate_workout_plan
-  estimate_nutrition
-  swap_meal
 }
 
 enum AiCallStatus {
@@ -237,13 +234,14 @@ enum AiCallStatus {
 // ---------------------------------------------------------------------------
 
 model User {
-  /// Mesmo uuid de auth.users.id no Supabase.
-  id        String    @id @db.Uuid
-  email     String    @unique @db.Citext
+  id           String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String @unique @db.Citext
+  /// scrypt: "scrypt$N$r$p$salt$hash" (base64). Nunca a senha em texto.
+  passwordHash String @map("password_hash") @db.VarChar(255)
+  /// Incrementado para invalidar todos os tokens emitidos antes.
+  tokenVersion Int    @default(0) @map("token_version")
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
-  /// Soft delete. LGPD: o expurgo definitivo roda em job assincrono.
-  deletedAt DateTime? @map("deleted_at")
 
   profile          UserProfile?
   nutritionTargets NutritionTarget[]
@@ -256,7 +254,8 @@ model User {
   progressLogs     ProgressLog[]
   aiUsageLogs      AiUsageLog[]
 
-  @@index([deletedAt])
+  /// Exclusao de conta (LGPD) e DELETE real: o cascade apaga todos os dados do
+  /// usuario. `ai_usage_logs` ficam anonimizados (user_id -> NULL).
   @@map("users")
 }
 
@@ -296,6 +295,9 @@ model UserProfile {
   locale   String @default("pt-BR") @db.VarChar(10)
 
   onboardingCompletedAt DateTime? @map("onboarding_completed_at")
+  /// LGPD art. 11: momento do consentimento explicito para dados de saude
+  /// (peso, medidas, fotos de refeicao). Gravado no onboarding.
+  healthDataConsentAt   DateTime? @map("health_data_consent_at")
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
 
@@ -359,6 +361,13 @@ model Food {
   fatPer100      Float @map("fat_per_100")
   fiberPer100    Float @default(0) @map("fiber_per_100")
   sodiumMgPer100 Float? @map("sodium_mg_per_100")
+
+  preparationMethod   PreparationMethod @default(unknown) @map("preparation_method")
+  /// Porcao tipica em gramas. Base do gerador de cardapio e da estimativa da IA.
+  typicalPortionGrams Float?            @map("typical_portion_grams")
+  /// Usadas para filtrar restricoes no gerador de cardapio:
+  /// animal, meat, fish, pork, egg, dairy, lactose, gluten, nuts, soy, legume, sugary.
+  tags                String[]          @default([])
 
   /// Null = alimento publico. Preenchido = alimento privado do usuario.
   ownerId String? @map("owner_id") @db.Uuid
@@ -426,14 +435,12 @@ model Meal {
 
   /// Totais denormalizados. O resumo diario vira UMA leitura indexada em vez de
   /// join + agregacao sobre meal_foods. Recalculados em transacao a cada
-  /// escrita de MealFood - ver `apps/api/src/modules/meals/meal.repository.ts`.
+  /// escrita de MealFood - ver `apps/api/src/modules/diario/diario.service.ts`.
   totalCalories Float @default(0) @map("total_calories")
   totalProtein  Float @default(0) @map("total_protein")
   totalCarbs    Float @default(0) @map("total_carbs")
   totalFat      Float @default(0) @map("total_fat")
   totalFiber    Float @default(0) @map("total_fiber")
-
-  photoStoragePath String? @map("photo_storage_path") @db.VarChar(300)
 
   analysisId String?       @unique @map("analysis_id") @db.Uuid
   analysis   MealAnalysis? @relation(fields: [analysisId], references: [id], onDelete: SetNull)
@@ -501,7 +508,9 @@ model MealAnalysis {
   userId String @map("user_id") @db.Uuid
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  storagePath String @map("storage_path") @db.VarChar(300)
+  /// SHA-256 da foto. A foto em si NAO e armazenada (dado sensivel, LGPD);
+  /// o hash so serve para nao reanalisar a mesma imagem.
+  imageSha256 String @map("image_sha256") @db.Char(64)
 
   isFood            Boolean
   rejectionReason   String?           @map("rejection_reason") @db.VarChar(200)
@@ -513,10 +522,10 @@ model MealAnalysis {
   /// Output validado do modelo, na integra.
   rawOutput Json @map("raw_output")
 
-  provider    String @db.VarChar(40)
-  model       String @db.VarChar(60)
-  promptVersion String @map("prompt_version") @db.VarChar(20)
-  processingMs Int   @map("processing_ms")
+  provider     String @db.VarChar(40)
+  model        String @db.VarChar(80)
+  modelVersion String @map("model_version") @db.VarChar(30)
+  processingMs Int    @map("processing_ms")
 
   /// true quando o usuario efetivamente salvou uma refeicao a partir desta analise.
   wasAccepted Boolean @default(false) @map("was_accepted")
@@ -526,6 +535,7 @@ model MealAnalysis {
   meal Meal?
 
   @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, imageSha256])
   @@index([wasAccepted])
   @@map("meal_analyses")
 }
@@ -540,7 +550,7 @@ model MealPlan {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   name      String     @db.VarChar(80)
-  status    PlanStatus @default(generating)
+  status    PlanStatus @default(active)
   startsOn  DateTime   @map("starts_on") @db.Date
 
   targetCalories Float @map("target_calories")
@@ -548,12 +558,11 @@ model MealPlan {
   targetCarbs    Float @map("target_carbs")
   targetFat      Float @map("target_fat")
 
-  /// Justificativa gerada pela IA, exibida como "por que este plano".
+  /// Explicacao exibida como "por que este plano".
   rationale String? @db.VarChar(500)
 
-  provider      String? @db.VarChar(40)
-  model         String? @db.VarChar(60)
-  promptVersion String? @map("prompt_version") @db.VarChar(20)
+  /// Versao do gerador por regras (packages/core) que montou o plano.
+  generatorVersion String @map("generator_version") @db.VarChar(30)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -640,8 +649,7 @@ model MealPlanItem {
 // TREINO
 // ---------------------------------------------------------------------------
 
-/// Catalogo curado. A IA SELECIONA exercicios daqui por canonicalName - nunca
-/// inventa. Exercicio inventado nao tem instrucao, video nem grupo muscular.
+/// Catalogo curado. O gerador de treino (regras do core) so escolhe daqui.
 model Exercise {
   id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name          String      @db.VarChar(100)
@@ -674,13 +682,11 @@ model WorkoutPlan {
   name        String     @db.VarChar(80)
   split       String     @db.VarChar(40)
   daysPerWeek Int        @map("days_per_week")
-  status      PlanStatus @default(generating)
+  status      PlanStatus @default(active)
   startsOn    DateTime   @map("starts_on") @db.Date
   rationale   String?    @db.VarChar(500)
 
-  provider      String? @db.VarChar(40)
-  model         String? @db.VarChar(60)
-  promptVersion String? @map("prompt_version") @db.VarChar(20)
+  generatorVersion String @map("generator_version") @db.VarChar(30)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -691,7 +697,8 @@ model WorkoutPlan {
   @@map("workout_plans")
 }
 
-/// Uma sessao do plano ("Treino A - Peito e Triceps"). E um MOLDE: a execucao
+/// Uma sessao do plano ("Treino A - Peito e Triceps"). `dayIndex` e a posicao
+/// no ciclo; o dia da semana vem de `trainingWeekdays()` do core. E um MOLDE: a execucao
 /// de verdade vira WorkoutLog, para o usuario poder repetir o mesmo treino
 /// varias vezes sem duplicar a prescricao.
 model Workout {
@@ -733,7 +740,7 @@ model WorkoutExercise {
   @@map("workout_exercises")
 }
 
-/// Uma execucao de treino. Comeca com POST /workouts/:id/start.
+/// Uma execucao de treino. Comeca com POST /treinos/:id/iniciar.
 model WorkoutLog {
   id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String  @map("user_id") @db.Uuid
@@ -815,8 +822,7 @@ model ProgressLog {
   value      Float
   measuredOn DateTime       @map("measured_on") @db.Date
 
-  photoStoragePath String? @map("photo_storage_path") @db.VarChar(300)
-  notes            String? @db.VarChar(300)
+  notes String? @db.VarChar(300)
 
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -826,31 +832,23 @@ model ProgressLog {
   @@map("progress_logs")
 }
 
-/// Custo e latencia de cada chamada de IA.
+/// Cada chamada ao servico de IA (sucesso ou falha).
 ///
-/// Sem isto, descobrir que a conta do provedor triplicou vira arqueologia. Com
-/// isto da para ver custo por usuario, taxa de falha de validacao por versao de
-/// prompt e p95 de latencia - e aplicar limite de uso por usuario.
+/// Base da cota diaria por usuario, da taxa de falha por versao de modelo e
+/// do p95 de latencia. O modelo roda local (sem custo por chamada), mas a
+/// chamada consome CPU do servico de IA - por isso a cota continua valendo.
 model AiUsageLog {
   id     String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId String? @map("user_id") @db.Uuid
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  operation     AiOperation
-  status        AiCallStatus
-  provider      String       @db.VarChar(40)
-  model         String       @db.VarChar(60)
-  promptVersion String       @map("prompt_version") @db.VarChar(20)
-
-  inputTokens      Int   @default(0) @map("input_tokens")
-  outputTokens     Int   @default(0) @map("output_tokens")
-  cacheReadTokens  Int   @default(0) @map("cache_read_tokens")
-  estimatedCostUsd Float @default(0) @map("estimated_cost_usd")
-  latencyMs        Int   @map("latency_ms")
-
-  /// Quantas vezes tivemos que repetir por output invalido.
-  retryCount   Int     @default(0) @map("retry_count")
-  errorMessage String? @map("error_message") @db.VarChar(500)
+  operation    AiOperation
+  status       AiCallStatus
+  provider     String       @db.VarChar(40)
+  model        String       @db.VarChar(80)
+  modelVersion String       @map("model_version") @db.VarChar(30)
+  latencyMs    Int          @map("latency_ms")
+  errorMessage String?      @map("error_message") @db.VarChar(500)
 
   createdAt DateTime @default(now()) @map("created_at")
 

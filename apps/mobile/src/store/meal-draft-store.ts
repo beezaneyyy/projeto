@@ -1,19 +1,27 @@
-import type { MealType, MeasureUnit, NutritionPer100, PortionSource, PreparationMethod } from '@nutrisnap/core';
+import type {
+  Food,
+  Meal,
+  MealAnalysisResult,
+  MealType,
+  MeasureUnit,
+  NutritionPer100,
+  PortionSource,
+  PreparationMethod,
+} from '@nutrisnap/core';
 import { create } from 'zustand';
 
-import type { FoodDefinition } from '@/lib/food-database';
-import type { MockAnalysisResult } from '@/lib/mock-analysis';
+import type { PhotoFile } from '@/services/api/endpoints';
 
 /**
  * Estado transiente de UMA refeicao em registro: foto -> analise -> confirmacao.
- *
- * Deliberadamente fora de `diary-store` (que e persistido): este rascunho
- * some se o usuario fechar o fluxo sem salvar, o diario nao deveria.
+ * Some se o usuario fechar o fluxo sem salvar. Nada aqui e "o dado oficial":
+ * a refeicao so existe depois do POST /diario (ou PUT, na edicao).
  */
 export interface MealDraftItem {
   clientId: string;
+  foodId: string | null;
   nameSnapshot: string;
-  per100gSnapshot: NutritionPer100;
+  per100gSnapshot: NutritionPer100 & { fiber: number };
   preparationMethod: PreparationMethod;
   unit: MeasureUnit;
   grams: number;
@@ -24,57 +32,93 @@ export interface MealDraftItem {
   portionSource: PortionSource;
 }
 
+export type ConfirmationReason = MealAnalysisResult['confirmationReasons'][number];
+
 interface MealDraftState {
   mealType: MealType;
-  photoUri: string | null;
-  items: MealDraftItem[];
+  photo: PhotoFile | null;
+  /** Id da analise (POST /scan-prato). Vincula a refeicao salva a ela. */
+  analysisId: string | null;
+  needsConfirmation: boolean;
+  confirmationReasons: ConfirmationReason[];
+  description: string | null;
   disclaimer: string | null;
+  /** Edicao de refeicao ja salva (PUT /diario/:id). */
+  editingMealId: string | null;
   setMealType: (mealType: MealType) => void;
-  setPhoto: (uri: string | null) => void;
-  setFromAnalysis: (result: MockAnalysisResult) => void;
+  setPhoto: (photo: PhotoFile | null) => void;
+  setFromAnalysis: (result: MealAnalysisResult) => void;
+  loadMeal: (meal: Meal) => void;
   updateGrams: (clientId: string, grams: number) => void;
   removeItem: (clientId: string) => void;
-  addManualFood: (food: FoodDefinition, grams: number) => void;
+  addManualFood: (food: Food, grams: number) => void;
+  items: MealDraftItem[];
   reset: () => void;
 }
 
-function itemFromFood(food: FoodDefinition, grams: number, portionSource: PortionSource): MealDraftItem {
-  return {
-    clientId: `manual-${Date.now()}-${Math.round(Math.random() * 1e6)}`,
-    nameSnapshot: food.name,
-    per100gSnapshot: food.per100g,
-    preparationMethod: food.preparationMethod,
-    unit: 'g',
-    grams,
-    portionSource,
-  };
-}
+const EMPTY = {
+  mealType: 'lunch' as MealType,
+  photo: null,
+  analysisId: null,
+  needsConfirmation: false,
+  confirmationReasons: [],
+  description: null,
+  disclaimer: null,
+  editingMealId: null,
+  items: [],
+};
+
+let counter = 0;
+const nextId = (prefix: string) => `${prefix}-${Date.now()}-${(counter += 1)}`;
 
 export const useMealDraftStore = create<MealDraftState>()((set) => ({
-  mealType: 'lunch',
-  photoUri: null,
-  items: [],
-  disclaimer: null,
+  ...EMPTY,
 
   setMealType: (mealType) => set({ mealType }),
-  setPhoto: (photoUri) => set({ photoUri }),
+  setPhoto: (photo) => set({ photo }),
 
   setFromAnalysis: (result) =>
     set({
+      analysisId: result.analysisId,
+      mealType: result.mealType,
+      needsConfirmation: result.needsUserConfirmation,
+      confirmationReasons: result.confirmationReasons,
+      description: result.description ?? null,
       disclaimer: result.disclaimer,
-      mealType: result.suggestedMealType,
-      items: result.foods.map((analyzed) => ({
-        clientId: analyzed.clientId,
-        nameSnapshot: analyzed.food.name,
-        per100gSnapshot: analyzed.food.per100g,
-        preparationMethod: analyzed.food.preparationMethod,
+      items: result.foods.map((food) => ({
+        clientId: food.clientId,
+        foodId: food.foodId ?? null,
+        nameSnapshot: food.name,
+        per100gSnapshot: food.per100g,
+        preparationMethod: food.preparationMethod,
         unit: 'g',
-        grams: analyzed.estimatedGrams,
-        minGrams: analyzed.minGrams,
-        maxGrams: analyzed.maxGrams,
-        aiEstimatedGrams: analyzed.estimatedGrams,
-        aiConfidence: analyzed.confidence,
+        grams: food.estimatedGrams,
+        minGrams: food.minGrams,
+        maxGrams: food.maxGrams,
+        aiEstimatedGrams: food.estimatedGrams,
+        aiConfidence: food.confidence,
         portionSource: 'ai_estimate',
+      })),
+    }),
+
+  loadMeal: (meal) =>
+    set({
+      ...EMPTY,
+      editingMealId: meal.id,
+      mealType: meal.mealType,
+      analysisId: meal.analysisId,
+      description: meal.title,
+      items: meal.foods.map((food) => ({
+        clientId: food.id,
+        foodId: food.foodId,
+        nameSnapshot: food.nameSnapshot,
+        per100gSnapshot: food.per100gSnapshot,
+        preparationMethod: food.preparationMethod,
+        unit: food.unit,
+        grams: food.grams,
+        aiEstimatedGrams: food.aiEstimatedGrams,
+        aiConfidence: food.aiConfidence,
+        portionSource: food.portionSource,
       })),
     }),
 
@@ -97,7 +141,21 @@ export const useMealDraftStore = create<MealDraftState>()((set) => ({
   removeItem: (clientId) => set((state) => ({ items: state.items.filter((item) => item.clientId !== clientId) })),
 
   addManualFood: (food, grams) =>
-    set((state) => ({ items: [...state.items, itemFromFood(food, grams, 'manual_entry')] })),
+    set((state) => ({
+      items: [
+        ...state.items,
+        {
+          clientId: nextId('manual'),
+          foodId: food.id,
+          nameSnapshot: food.name,
+          per100gSnapshot: food.per100g,
+          preparationMethod: 'unknown',
+          unit: 'g',
+          grams,
+          portionSource: 'manual_entry',
+        },
+      ],
+    })),
 
-  reset: () => set({ mealType: 'lunch', photoUri: null, items: [], disclaimer: null }),
+  reset: () => set({ ...EMPTY }),
 }));

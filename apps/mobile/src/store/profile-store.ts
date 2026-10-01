@@ -1,24 +1,23 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {
-  buildEnergyPlan,
-  yearsSince,
-  type ActivityLevel,
-  type DietaryRestriction,
-  type EnergyPlan,
-  type Equipment,
-  type Goal,
-  type GoalPace,
-  type Sex,
-  type TrainingExperience,
-  type TrainingLocation,
+import type {
+  ActivityLevel,
+  DietaryRestriction,
+  Equipment,
+  Goal,
+  GoalPace,
+  Sex,
+  TrainingExperience,
+  TrainingLocation,
+  UserProfileResponse,
 } from '@nutrisnap/core';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
 /**
- * Rascunho preenchido passo a passo no onboarding (ver docs/02-mvp.md, item 2).
- * Campos opcionais de proposito: cada passo so preenche os seus, e o usuario
- * pode fechar o app no meio e retomar de onde parou.
+ * RASCUNHO do onboarding, preenchido passo a passo (docs/02-mvp.md, item 2).
+ * So isto fica no aparelho, para retomar o questionario se o app fechar no
+ * meio. O perfil de verdade, a meta e o diario vem da API (GET /perfil),
+ * nunca daqui. O rascunho e apagado quando o onboarding e salvo.
  */
 export interface OnboardingDraft {
   displayName?: string;
@@ -38,102 +37,43 @@ export interface OnboardingDraft {
   availableEquipment?: Equipment[];
 }
 
-export type Profile = Required<
-  Pick<
-    OnboardingDraft,
-    | 'displayName'
-    | 'sex'
-    | 'birthDate'
-    | 'heightCm'
-    | 'weightKg'
-    | 'goal'
-    | 'pace'
-    | 'activityLevel'
-    | 'trainingDaysPerWeek'
-    | 'experience'
-    | 'location'
-    | 'availableEquipment'
-    | 'restrictions'
-  >
-> & {
-  bodyFatPercentage?: number | null;
-  targetWeightKg?: number | null;
-};
-
-interface ProfileState {
+interface ProfileDraftState {
   draft: OnboardingDraft;
-  profile: Profile | null;
-  energyPlan: EnergyPlan | null;
   updateDraft: (patch: Partial<OnboardingDraft>) => void;
-  completeOnboarding: () => void;
-  resetProfile: () => void;
+  /** Refazer o questionario partindo do perfil salvo no servidor. */
+  loadFromProfile: (profile: UserProfileResponse) => void;
+  resetDraft: () => void;
 }
 
-function computeEnergyPlan(profile: Profile): EnergyPlan {
-  return buildEnergyPlan({
-    sex: profile.sex,
-    ageYears: yearsSince(new Date(profile.birthDate)),
-    heightCm: profile.heightCm,
-    weightKg: profile.weightKg,
-    bodyFatPercentage: profile.bodyFatPercentage,
-    activityLevel: profile.activityLevel,
-    goal: profile.goal,
-    pace: profile.pace,
-  });
-}
-
-export const useProfileStore = create<ProfileState>()(
+export const useProfileStore = create<ProfileDraftState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       draft: {},
-      profile: null,
-      energyPlan: null,
-
       updateDraft: (patch) => set((state) => ({ draft: { ...state.draft, ...patch } })),
-
-      completeOnboarding: () => {
-        const { draft } = get();
-        if (
-          !draft.displayName ||
-          !draft.sex ||
-          !draft.birthDate ||
-          !draft.heightCm ||
-          !draft.weightKg ||
-          !draft.goal ||
-          !draft.activityLevel ||
-          draft.trainingDaysPerWeek === undefined ||
-          !draft.experience ||
-          !draft.location ||
-          !draft.availableEquipment
-        ) {
-          throw new Error('Onboarding incompleto: faltam campos obrigatorios.');
-        }
-
-        const profile: Profile = {
-          displayName: draft.displayName,
-          sex: draft.sex,
-          birthDate: draft.birthDate,
-          heightCm: draft.heightCm,
-          weightKg: draft.weightKg,
-          bodyFatPercentage: draft.bodyFatPercentage ?? null,
-          goal: draft.goal,
-          pace: draft.pace ?? 'moderate',
-          targetWeightKg: draft.targetWeightKg ?? null,
-          activityLevel: draft.activityLevel,
-          trainingDaysPerWeek: draft.trainingDaysPerWeek,
-          experience: draft.experience,
-          location: draft.location,
-          availableEquipment: draft.availableEquipment,
-          restrictions: draft.restrictions ?? [],
-        };
-
-        set({ profile, energyPlan: computeEnergyPlan(profile) });
-      },
-
-      resetProfile: () => set({ draft: {}, profile: null, energyPlan: null }),
+      loadFromProfile: (p) =>
+        set({
+          draft: {
+            displayName: p.displayName,
+            sex: p.sex,
+            birthDate: p.birthDate,
+            heightCm: p.heightCm,
+            weightKg: p.weightKg,
+            bodyFatPercentage: p.bodyFatPercentage ?? null,
+            goal: p.goal,
+            pace: p.pace,
+            targetWeightKg: p.targetWeightKg ?? null,
+            activityLevel: p.activityLevel,
+            trainingDaysPerWeek: p.trainingDaysPerWeek,
+            restrictions: p.restrictions,
+            experience: p.experience,
+            location: p.location,
+            availableEquipment: p.availableEquipment,
+          },
+        }),
+      resetDraft: () => set({ draft: {} }),
     }),
     {
-      name: 'nutrisnap.profile',
+      name: 'nutrix.onboarding-draft',
       storage: createJSONStorage(() => AsyncStorage),
     },
   ),

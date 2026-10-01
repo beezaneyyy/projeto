@@ -44,7 +44,7 @@ export const createFoodSchema = foodSchema
   });
 export type CreateFoodInput = z.infer<typeof createFoodSchema>;
 
-/** Query de `GET /foods`. Busca textual com paginacao por cursor. */
+/** Query de `GET /alimentos`. Busca textual com paginacao por cursor. */
 export const searchFoodQuerySchema = z.object({
   q: z.string().trim().min(2).max(60),
   category: foodCategorySchema.optional(),
@@ -52,3 +52,9 @@ export const searchFoodQuerySchema = z.object({
   cursor: z.string().max(200).optional(),
 });
 export type SearchFoodQuery = z.infer<typeof searchFoodQuerySchema>;
+
+export const foodSearchResponseSchema = z.object({
+  items: z.array(foodSchema),
+  nextCursor: z.string().nullable(),
+});
+export type FoodSearchResponse = z.infer<typeof foodSearchResponseSchema>;

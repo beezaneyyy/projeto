@@ -25,6 +25,12 @@ export default function CaptureScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Guarda o ARQUIVO (uri + tipo + nome): ele vai em multipart para POST /scan-prato.
+  function handleAsset(asset: ImagePicker.ImagePickerAsset) {
+    setPhoto({ uri: asset.uri, mimeType: asset.mimeType ?? null, fileName: asset.fileName ?? null });
+    router.push('/meal/analyzing');
+  }
+
   async function handleTakePhoto() {
     const permission = await ImagePicker.requestCameraPermissionsAsync();
     if (!permission.granted) {
@@ -32,10 +38,7 @@ export default function CaptureScreen() {
       return;
     }
     const result = await ImagePicker.launchCameraAsync({ quality: 0.7, allowsEditing: false });
-    if (!result.canceled && result.assets[0]) {
-      setPhoto(result.assets[0].uri);
-      router.push('/meal/analyzing');
-    }
+    if (!result.canceled && result.assets[0]) handleAsset(result.assets[0]);
   }
 
   async function handlePickFromGallery() {
@@ -44,11 +47,12 @@ export default function CaptureScreen() {
       Alert.alert('Permissão necessária', 'Precisamos acessar suas fotos para escolher uma imagem.');
       return;
     }
-    const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.7, allowsEditing: false });
-    if (!result.canceled && result.assets[0]) {
-      setPhoto(result.assets[0].uri);
-      router.push('/meal/analyzing');
-    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.7,
+      allowsEditing: false,
+    });
+    if (!result.canceled && result.assets[0]) handleAsset(result.assets[0]);
   }
 
   return (

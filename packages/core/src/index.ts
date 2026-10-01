@@ -22,20 +22,29 @@ export * from './domain/nutrition/daily-summary.js';
 export * from './domain/nutrition/energy-plan.js';
 export * from './domain/nutrition/macros.js';
 export * from './domain/nutrition/meal-analysis.js';
+export * from './domain/nutrition/meal-plan-generator.js';
 export * from './domain/nutrition/portions.js';
 export * from './domain/nutrition/tdee.js';
+export * from './domain/progress/trends.js';
+export * from './domain/training/schedule.js';
+export * from './domain/training/workout-metrics.js';
+export * from './domain/training/workout-plan-generator.js';
 
 // Contratos
 export * from './schemas/ai.js';
+export * from './schemas/common.js';
 export * from './schemas/enums.js';
 export * from './schemas/food.js';
 export * from './schemas/meal-plan.js';
 export * from './schemas/meal.js';
+export * from './schemas/nutrition.js';
 export * from './schemas/profile.js';
 export * from './schemas/progress.js';
+export * from './schemas/user.js';
 export * from './schemas/workout.js';
 
 // Utilitarios
+export * from './utils/dates.js';
 export * from './utils/errors.js';
 export * from './utils/id.js';
 export * from './utils/math.js';

@@ -1,124 +1,143 @@
 # API REST
 
-Base: `/v1`. Todas as rotas exceto `/health` exigem `Authorization: Bearer <jwt>`.
+Servidor: `apps/api` (Node + Express). Contratos (Zod) de entrada e saída em `packages/core/src/schemas/`; o app importa os mesmos tipos.
+
+Rotas autenticadas exigem `Authorization: Bearer <token>`, com o token devolvido por `/cadastro` ou `/login`. Campos JSON em inglês (iguais aos contratos do core); rotas em português, como no guia.
 
 ## Autenticação e autorização
 
-**Autenticação** acontece no Supabase Auth, no app. O backend só valida a assinatura do JWT (offline, sem round-trip) e extrai `sub` → `userId`.
-
-**Autorização** é uniforme e não negociável: o `userId` vem do token, nunca do corpo ou da query. Todo repositório recebe `userId` e filtra por ele. Um recurso de outro usuário responde **404**, não 403 — 403 confirmaria que o recurso existe.
-
-**Validação**: todo `body`, `params` e `query` passa por um schema Zod de `@nutrisnap/core` antes de chegar ao controller. Falha → `422` com a lista de campos.
+- **Autenticação própria:** e-mail + senha (hash scrypt) na tabela `users`. A API emite um JWT (validade padrão de 30 dias). `POST /logout` invalida **todos** os tokens do usuário (`token_version`).
+- **Autorização:** o `userId` vem do token, nunca do corpo ou da query. Recurso de outro usuário responde **404**, não 403.
+- **Validação:** `body`, `params` e `query` passam pelo schema Zod antes do handler. Falha → `422` com a lista de campos. A resposta também é validada; o que não está no contrato não sai.
 
 ### Códigos de erro
 
 | Código | Quando |
 |---|---|
 | 400 | JSON malformado |
-| 401 | Token ausente, expirado ou inválido |
+| 401 | Token ausente, inválido, expirado ou revogado; credenciais erradas |
 | 404 | Não existe **ou** não é seu |
-| 409 | Conflito de estado (ex.: treino já iniciado) |
-| 422 | Falhou na validação Zod ou em regra de domínio (`DomainError`) |
-| 429 | Rate limit |
-| 502 | Provedor de IA indisponível ou devolveu output inválido após retentativa |
+| 409 | Conflito de estado (e-mail já usado, treino em andamento, plano ativo, onboarding pendente) |
+| 413 | Foto ou corpo grande demais |
+| 422 | Falhou na validação Zod, em regra de domínio (`DomainError`) ou a imagem é inválida (`photo_required`, `photo_empty`, `unsupported_image`) |
+| 429 | Rate limit ou cota diária |
+| 502 | Serviço de IA indisponível, lento ou com resposta fora do contrato |
 
 Corpo do erro:
 ```json
-{ "error": { "code": "out_of_range", "message": "...", "details": {}, "requestId": "..." } }
+{ "error": { "code": "validation_failed", "message": "...", "details": {}, "requestId": "..." } }
 ```
+O `requestId` também volta no header `x-request-id`.
 
 ---
 
-## Endpoints
+## Rotas do guia
 
-### Auth
+| Método | Rota | Auth | O que faz |
+|---|---|---|---|
+| POST | `/cadastro` | — | Cria o usuário (`email`, `password` 8–128) e devolve `{ token, expiresAt, user }`. E-mail repetido → 409 |
+| POST | `/calculo-fisico` | — | TMB + TDEE + meta calórica + macros (core). Sem efeito colateral; serve para a prévia do onboarding |
+| GET | `/treino-dia` | ✔ | Treino agendado para hoje no plano ativo, ou `isRestDay: true` + `nextWorkout` |
+| POST | `/scan-prato` | ✔ | **Rota mágica.** `multipart/form-data`: `foto` (JPEG/PNG/WebP, máx. 5 MB) + `mealType?` + `userHint?`. A API repassa ao serviço Python e devolve alimentos, gramas, macros, faixa de calorias e se precisa confirmar. **Não salva no diário** |
 
-| Método | Rota | Notas |
-|---|---|---|
-| POST | `/auth/bootstrap` | Cria a linha `User` local no primeiro acesso. Idempotente. |
+## Demais rotas do MVP
 
-> **Mudança em relação ao briefing:** `POST /auth/register` e `POST /auth/login` não existem. Com Supabase Auth, o app fala direto com o GoTrue — proxiar isso significaria reimplementar rotação de refresh token, com risco de segurança e nenhum ganho.
-
-### Usuário
-
-| Método | Rota | Notas |
-|---|---|---|
-| GET | `/users/me` | Perfil + meta vigente + status do onboarding |
-| PUT | `/users/me` | Atualização parcial. Mudar peso/objetivo **encerra a meta atual e cria uma nova** `NutritionTarget` |
-| POST | `/users/me/onboarding` | Recebe o perfil completo, calcula e persiste a primeira meta |
-| DELETE | `/users/me` | Soft delete + job de expurgo (LGPD) |
-
-### Nutrição
+### Sessão
 
 | Método | Rota | Notas |
 |---|---|---|
-| POST | `/nutrition/energy-plan` | TMB + TDEE + meta + macros em uma chamada. Sem efeito colateral — usado na prévia do onboarding |
-| GET | `/nutrition/targets/current` | Meta vigente |
-| GET | `/nutrition/daily-summary?date=YYYY-MM-DD` | Consumido, restante, por refeição. Compara com a meta **daquele dia** |
+| POST | `/login` | `{ email, password }` → `{ token, expiresAt, user }`. Mesma resposta para e-mail inexistente e senha errada |
+| POST | `/logout` | Invalida todos os tokens do usuário. 204 |
 
-> `/nutrition/bmr` e `/nutrition/tdee` separados foram unificados em `/nutrition/energy-plan`. Duas chamadas encadeadas dobram a latência do onboarding e permitem estado inconsistente (TMB de um corpo, TDEE de outro).
-
-### Refeições
+### Perfil (tabela "Usuários")
 
 | Método | Rota | Notas |
 |---|---|---|
-| POST | `/meals/photo-upload-url` | Devolve signed URL de escrita. **Rate limit por usuário** |
-| POST | `/meals/analyze-image` | Recebe `storagePath`, chama a IA, devolve estimativa. **Não salva refeição** |
-| POST | `/meals` | Salva o que o usuário confirmou |
-| GET | `/meals?date=` ou `?from=&to=` | Cursor-based |
-| GET | `/meals/:id` | |
-| PUT | `/meals/:id` | Recalcula os totais em transação |
-| DELETE | `/meals/:id` | |
+| GET | `/perfil` | Perfil + meta vigente + status do onboarding |
+| POST | `/perfil` | Onboarding: perfil completo + `healthDataConsent: true` (LGPD). Calcula e grava a primeira meta e o peso inicial |
+| PUT | `/perfil` | Atualização parcial. Mudar peso/objetivo/atividade **encerra a meta atual e cria uma nova** |
+| DELETE | `/perfil` | Exclui a conta e **todos** os dados (DELETE real, cascade). 204 |
 
-**Por que analisar e salvar são separados:** a análise é uma sugestão; a refeição é um fato. Juntar os dois gravaria no diário um número que o usuário nunca confirmou.
+### Dieta
+
+| Método | Rota | Notas |
+|---|---|---|
+| GET | `/dieta/meta` | Meta vigente (calorias, proteína, carboidratos, gorduras, fibra, avisos) |
+| GET | `/dieta/resumo?date=YYYY-MM-DD` | Consumido, restante e por refeição. Compara com a meta vigente **naquele dia** |
+
+### Diário alimentar
+
+| Método | Rota | Notas |
+|---|---|---|
+| POST | `/diario` | Salva a refeição confirmada. `analysisId` opcional (vinda do `/scan-prato`; cada análise vira no máximo uma refeição). Totais **recalculados no servidor** a partir de `per100gSnapshot × grams` |
+| GET | `/diario?date=` ou `?from=&to=` | Histórico, paginado por cursor (`nextCursor`) |
+| GET | `/diario/:id` | |
+| PUT | `/diario/:id` | Atualização parcial; recalcula totais em transação |
+| DELETE | `/diario/:id` | 204 |
 
 ### Alimentos
 
 | Método | Rota | Notas |
 |---|---|---|
-| GET | `/foods?q=` | Busca por trigram. Verificados primeiro, depois os do usuário |
-| GET | `/foods/:id` | |
-| POST | `/foods` | Alimento privado do usuário (`source: user`) |
+| GET | `/alimentos?q=&category=&limit=&cursor=` | Busca por substring + similaridade (pg_trgm). Públicos e os do próprio usuário |
+| GET | `/alimentos/:id` | |
+| POST | `/alimentos` | Alimento privado do usuário (`source: user`) |
 
 ### Plano alimentar
 
 | Método | Rota | Notas |
 |---|---|---|
-| POST | `/meal-plans/generate` | **Assíncrono**: responde 202 com `planId` e status `generating` |
-| GET | `/meal-plans/current` | |
-| POST | `/meal-plans/:planId/meals/:mealId/swap` | Troca uma refeição sem regenerar o plano |
-| PUT | `/meal-plans/:planId/items/:itemId` | Ajusta quantidade |
+| POST | `/plano-alimentar/gerar` | `{ days?: 1-7, force?: bool }`. Gera **na hora** (regras do core) pela meta e restrições. Com plano ativo e sem `force` → 409 |
+| GET | `/plano-alimentar` | Plano ativo (404 se não houver) |
+| POST | `/plano-alimentar/refeicoes/:mealId/trocar` | `{ keepItemIds?: [] }`. Troca uma refeição mantendo os itens travados |
+| PUT | `/plano-alimentar/itens/:itemId` | `{ quantity, unit, grams }`. Recalcula os totais da refeição e do dia |
 
-> Gerar 7 dias leva 20–40 s. Segurar uma conexão HTTP nisso é receita para timeout de gateway. O app faz polling ou escuta Realtime.
-
-### Treino
+### Treinos
 
 | Método | Rota | Notas |
 |---|---|---|
-| POST | `/workout-plans/generate` | 202, mesmo padrão |
-| GET | `/workout-plans/current` | |
-| GET | `/workouts/:id` | Prescrição + último log de cada exercício (para sugerir carga) |
-| POST | `/workouts/:id/start` | Cria `WorkoutLog`. 409 se já houver um em andamento |
-| POST | `/workouts/:id/complete` | Fecha, calcula volume total |
-| POST | `/exercises/:workoutExerciseId/log` | Registra as séries. **Idempotente por `(workoutLogId, workoutExerciseId)`** |
-
-> Idempotência aqui não é luxo: academia tem sinal ruim, e o app vai reenviar.
+| POST | `/treinos/gerar` | `{ force?: bool }`. Gera **na hora** pelo perfil (frequência, nível, objetivo, equipamento, tempo) |
+| GET | `/treinos/plano` | Plano ativo com os treinos e os exercícios |
+| GET | `/treinos/historico?from=&to=&cursor=` | Execuções de treino, paginadas |
+| GET | `/treinos/:id` | Prescrição + último registro de cada exercício (para sugerir carga) |
+| POST | `/treinos/:id/iniciar` | Cria a execução. 409 se já houver uma em andamento |
+| POST | `/treinos/:id/concluir` | Fecha a execução e calcula o volume total (aquecimento não conta) |
+| POST | `/treinos/exercicios/:workoutExerciseId/registro` | Séries do exercício. **Idempotente** por (execução, exercício): reenvio substitui, não duplica |
 
 ### Progresso
 
 | Método | Rota | Notas |
 |---|---|---|
-| GET | `/progress?metric=&from=&to=&granularity=` | Séries + aderência + streak |
-| POST | `/progress/logs` | Upsert por `(userId, metric, measuredOn)` |
-| DELETE | `/progress/logs/:id` | |
+| GET | `/progresso?metric=&from=&to=&granularity=day\|week` | Série da medida + média móvel de 7 dias, calorias × meta por dia, aderência calórica e de treino, streak |
+| POST | `/progresso/medidas` | Upsert por (métrica, dia) |
+| DELETE | `/progresso/medidas/:id` | 204 |
+
+### Operação
+
+| Método | Rota | Notas |
+|---|---|---|
+| GET | `/health` | Público. `{"status","banco","ia"}`: 200 se banco e IA estão ok, 503 se algum falhar |
+
+---
+
+## Serviço de IA (interno, `apps/ia`)
+
+Não é chamado pelo app, só pela API.
+
+| Método | Rota | Notas |
+|---|---|---|
+| POST | `/analisar` | `multipart`: `foto` + `dica?`. Header `x-internal-token` obrigatório. Devolve `{ resultado, modelo, versao, processamentoMs }`; `resultado` segue `mealAnalysisModelOutputSchema` |
+| GET | `/health` | Status e modelo carregado |
 
 ---
 
 ## Rate limiting
 
-| Escopo | Limite | Motivo |
+| Escopo | Limite | Onde é contado |
 |---|---|---|
-| Global por IP | 120/min | Abuso genérico |
-| `/meals/analyze-image` | 30/dia por usuário | Cada chamada custa dinheiro real |
-| `/meal-plans/generate`, `/workout-plans/generate` | 5/dia por usuário | Chamadas longas e caras |
-| `/foods?q=` | 60/min por usuário | Busca a cada tecla digitada |
+| Global por IP | 120/min | memória |
+| `/cadastro`, `/login` por IP | 10/min | memória |
+| `/scan-prato` por usuário | 10/min **e** 30/dia | memória (minuto) + `ai_usage_logs` (dia) |
+| `/alimentos?q=` por usuário | 60/min | memória |
+
+Todos configuráveis por variável de ambiente (`apps/api/.env.example`). Com mais de uma instância da API, os limites em memória passam a valer por instância; a cota diária, por estar no banco, continua global.

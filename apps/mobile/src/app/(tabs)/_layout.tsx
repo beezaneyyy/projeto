@@ -3,19 +3,38 @@ import { Redirect, router, Tabs } from 'expo-router';
 import { Platform, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ErrorBlock, LoadingBlock } from '@/components/ui/query-state';
+import { Screen } from '@/components/ui/screen';
 import { useTheme } from '@/hooks/use-theme';
-import { useProfileStore } from '@/store/profile-store';
+import { usePerfil } from '@/services/api/queries';
+import { useAuthStore } from '@/store/auth-store';
 
 const TAB_BAR_HEIGHT = 58;
 
 export default function TabsLayout() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const profile = useProfileStore((state) => state.profile);
+  const status = useAuthStore((state) => state.status);
+  // GET /perfil valida a sessao (401 -> volta ao login) e diz se o onboarding foi feito.
+  const perfil = usePerfil();
 
-  if (!profile) {
-    return <Redirect href="/onboarding" />;
+  if (status !== 'signedIn') return <Redirect href="/login" />;
+  if (perfil.isPending) {
+    return (
+      <Screen withTabBarInset={false}>
+        <LoadingBlock label="Conectando ao servidor..." />
+      </Screen>
+    );
   }
+  if (perfil.isError) {
+    // Sem rede nao desloga: o token continua salvo e o usuario tenta de novo.
+    return (
+      <Screen withTabBarInset={false}>
+        <ErrorBlock error={perfil.error} onRetry={() => void perfil.refetch()} />
+      </Screen>
+    );
+  }
+  if (!perfil.data.onboarding.completed) return <Redirect href="/onboarding" />;
 
   const tabBarHeight = TAB_BAR_HEIGHT + insets.bottom;
 

@@ -78,7 +78,7 @@ export const userProfileSchema = physicalDataSchema
     locale: z.string().min(2).max(10).default('pt-BR'),
   });
 
-/** Atualizacao parcial via PUT /users/me. */
+/** Atualizacao parcial via PUT /perfil. */
 export const updateUserProfileSchema = userProfileSchema.partial().refine(
   (value) => Object.keys(value).length > 0,
   { message: 'Envie ao menos um campo para atualizar.' },

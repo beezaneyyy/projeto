@@ -33,9 +33,8 @@ export const createMealSchema = z.object({
   consumedAt: z.string().datetime({ offset: true }),
   title: z.string().trim().max(140).nullish(),
   notes: z.string().trim().max(500).nullish(),
-  /** Vincula a refeicao a analise de IA que a originou. */
+  /** Vincula a refeicao a analise de IA (POST /scan-prato) que a originou. */
   analysisId: z.string().uuid().nullish(),
-  photoStoragePath: z.string().max(300).nullish(),
   foods: z.array(mealFoodInputSchema).min(1).max(30),
 });
 export type CreateMealInput = z.infer<typeof createMealSchema>;
@@ -46,7 +45,7 @@ export const updateMealSchema = createMealSchema.partial().refine(
 );
 export type UpdateMealInput = z.infer<typeof updateMealSchema>;
 
-/** Query de `GET /meals`. `date` filtra pelo dia local do usuario. */
+/** Query de `GET /diario`. `date` filtra pelo dia local do usuario. */
 export const listMealsQuerySchema = z
   .object({
     date: z.string().date().optional(),
@@ -65,3 +64,55 @@ export const dailySummaryQuerySchema = z.object({
   date: z.string().date(),
 });
 export type DailySummaryQuery = z.infer<typeof dailySummaryQuerySchema>;
+
+/** Um item de refeicao como devolvido pela API (com totais calculados pelo servidor). */
+export const mealFoodSchema = z.object({
+  id: z.string().uuid(),
+  foodId: z.string().uuid().nullable(),
+  nameSnapshot: z.string(),
+  per100gSnapshot: nutritionPer100Schema,
+  quantity: z.number(),
+  unit: measureUnitSchema,
+  grams: z.number(),
+  preparationMethod: preparationMethodSchema,
+  portionSource: portionSourceSchema,
+  aiConfidence: z.number().nullable(),
+  aiEstimatedGrams: z.number().nullable(),
+  totals: z.object({
+    calories: z.number(),
+    protein: z.number(),
+    carbs: z.number(),
+    fat: z.number(),
+    fiber: z.number(),
+  }),
+});
+export type MealFood = z.infer<typeof mealFoodSchema>;
+
+/** Refeicao salva no diario. */
+export const mealSchema = z.object({
+  id: z.string().uuid(),
+  mealType: mealTypeSchema,
+  consumedAt: z.string().datetime(),
+  /** Dia local do usuario (fuso do perfil). */
+  localDate: z.string().date(),
+  title: z.string().nullable(),
+  notes: z.string().nullable(),
+  analysisId: z.string().uuid().nullable(),
+  totals: z.object({
+    calories: z.number(),
+    protein: z.number(),
+    carbs: z.number(),
+    fat: z.number(),
+    fiber: z.number(),
+  }),
+  foods: z.array(mealFoodSchema),
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+});
+export type Meal = z.infer<typeof mealSchema>;
+
+export const mealListResponseSchema = z.object({
+  items: z.array(mealSchema),
+  nextCursor: z.string().nullable(),
+});
+export type MealListResponse = z.infer<typeof mealListResponseSchema>;

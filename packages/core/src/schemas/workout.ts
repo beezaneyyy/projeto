@@ -62,45 +62,6 @@ export const workoutPlanSchema = z.object({
 });
 export type WorkoutPlan = z.infer<typeof workoutPlanSchema>;
 
-/**
- * O que o modelo retorna ao gerar um plano de treino.
- *
- * Referencia exercicios por `canonicalName` do nosso catalogo - nunca texto
- * livre. Se o modelo citar algo que nao existe, a validacao rejeita e nos
- * regeneramos com a lista de nomes validos no prompt. Isso impede "supino
- * declinado com halter neutro na maquina Smith" virar um exercicio orfao sem
- * instrucoes, video ou grupo muscular.
- */
-export const workoutPlanModelOutputSchema = z.object({
-  name: z.string().trim().min(2).max(80),
-  split: z.string().trim().max(40),
-  rationale: z.string().trim().max(500),
-  workouts: z
-    .array(
-      z.object({
-        name: z.string().trim().min(2).max(80),
-        dayIndex: z.number().int().min(0).max(6),
-        focusMuscles: z.array(muscleGroupSchema).min(1).max(5),
-        exercises: z
-          .array(
-            z.object({
-              canonicalName: z.string().regex(/^[a-z0-9_]+$/).max(60),
-              sets: z.number().int().min(1).max(10),
-              repsMin: z.number().int().min(1).max(100),
-              repsMax: z.number().int().min(1).max(100),
-              restSeconds: z.number().int().min(0).max(600),
-              notes: z.string().trim().max(200).nullish(),
-            }),
-          )
-          .min(2)
-          .max(12),
-      }),
-    )
-    .min(1)
-    .max(7),
-});
-export type WorkoutPlanModelOutput = z.infer<typeof workoutPlanModelOutputSchema>;
-
 /** Uma serie executada. */
 export const setLogSchema = z.object({
   setNumber: z.number().int().min(1).max(20),
@@ -126,3 +87,81 @@ export const completeWorkoutSchema = z.object({
   notes: z.string().trim().max(500).nullish(),
 });
 export type CompleteWorkoutInput = z.infer<typeof completeWorkoutSchema>;
+
+/** Corpo de `POST /treinos/gerar`. O plano e montado por regras do core, na hora. */
+export const generateWorkoutPlanRequestSchema = z.object({
+  /** Substitui o plano ativo (o anterior e arquivado). */
+  force: z.boolean().default(false),
+});
+export type GenerateWorkoutPlanRequest = z.infer<typeof generateWorkoutPlanRequestSchema>;
+
+/** Ultima execucao de um exercicio, para sugerir carga na proxima. */
+export const lastExerciseLogSchema = z.object({
+  exerciseId: z.string().uuid(),
+  performedOn: z.string().date(),
+  sets: z.array(setLogSchema),
+});
+export type LastExerciseLog = z.infer<typeof lastExerciseLogSchema>;
+
+/** Resposta de `GET /treinos/:id`: prescricao + historico recente por exercicio. */
+export const workoutDetailSchema = workoutSchema.extend({
+  lastLogs: z.array(lastExerciseLogSchema),
+  /** Execucao em andamento deste treino, se houver. */
+  activeLogId: z.string().uuid().nullable(),
+});
+export type WorkoutDetail = z.infer<typeof workoutDetailSchema>;
+
+/** Uma execucao de treino (`WorkoutLog`) com as series registradas. */
+export const workoutLogSchema = z.object({
+  id: z.string().uuid(),
+  workoutId: z.string().uuid(),
+  workoutName: z.string(),
+  status: workoutStatusSchema,
+  startedAt: z.string().datetime(),
+  completedAt: z.string().datetime().nullable(),
+  localDate: z.string().date(),
+  durationSeconds: z.number().int().nullable(),
+  perceivedEffort: z.number().int().nullable(),
+  notes: z.string().nullable(),
+  totalVolumeKg: z.number(),
+  exercises: z.array(
+    z.object({
+      workoutExerciseId: z.string().uuid(),
+      exerciseId: z.string().uuid(),
+      completedAt: z.string().datetime().nullable(),
+      notes: z.string().nullable(),
+      sets: z.array(setLogSchema),
+    }),
+  ),
+});
+export type WorkoutLog = z.infer<typeof workoutLogSchema>;
+
+/** Query de `GET /treinos/historico`. */
+export const workoutLogsQuerySchema = z.object({
+  from: z.string().date().optional(),
+  to: z.string().date().optional(),
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+  cursor: z.string().max(200).optional(),
+});
+export type WorkoutLogsQuery = z.infer<typeof workoutLogsQuerySchema>;
+
+export const workoutLogListResponseSchema = z.object({
+  items: z.array(workoutLogSchema),
+  nextCursor: z.string().nullable(),
+});
+export type WorkoutLogListResponse = z.infer<typeof workoutLogListResponseSchema>;
+
+/** Resposta de `GET /treino-dia`: o treino agendado para hoje (ou descanso). */
+export const treinoDiaResponseSchema = z.object({
+  date: z.string().date(),
+  /** 0 = segunda-feira. */
+  weekday: z.number().int().min(0).max(6),
+  isRestDay: z.boolean(),
+  workout: workoutDetailSchema.nullable(),
+  /** Proximo treino agendado (util em dia de descanso). */
+  nextWorkout: z
+    .object({ workoutId: z.string().uuid(), name: z.string(), date: z.string().date() })
+    .nullable(),
+  disclaimer: z.string(),
+});
+export type TreinoDiaResponse = z.infer<typeof treinoDiaResponseSchema>;

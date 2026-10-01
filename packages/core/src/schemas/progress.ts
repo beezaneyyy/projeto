@@ -8,7 +8,6 @@ export const progressLogSchema = z.object({
   value: z.number().positive().max(500),
   /** Dia da medicao (nao datetime): peso e medida diaria, nao instantanea. */
   measuredOn: z.string().date(),
-  photoStoragePath: z.string().max(300).nullish(),
   notes: z.string().trim().max(300).nullish(),
 });
 export type ProgressLog = z.infer<typeof progressLogSchema>;
@@ -25,7 +24,7 @@ export const progressQuerySchema = z.object({
 });
 export type ProgressQuery = z.infer<typeof progressQuerySchema>;
 
-/** Resposta de `GET /progress`: series temporais + indicadores de aderencia. */
+/** Resposta de `GET /progresso`: series temporais + indicadores de aderencia. */
 export const progressOverviewSchema = z.object({
   weightSeries: z.array(z.object({ date: z.string(), value: z.number() })),
   /** Media movel de 7 dias - o numero que o usuario deve olhar, nao o peso do dia. */

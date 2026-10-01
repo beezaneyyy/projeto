@@ -74,8 +74,9 @@ export const detectedFoodSchema = z.object({
 export type DetectedFood = z.infer<typeof detectedFoodSchema>;
 
 /**
- * O que o modelo de visao DEVE retornar. Este e o schema passado como
- * structured output na chamada e usado para validar a resposta.
+ * O que o servico de IA (Python, `apps/ia`) DEVE retornar em `resultado`.
+ * A API valida a resposta com este schema antes de usar: output fora do
+ * contrato vira 502 e nunca chega ao app nem ao banco.
  *
  * Sem totais: eles sao derivados por nos. Sem `needsUserConfirmation`: e uma
  * regra de produto, nao uma opiniao do modelo.
@@ -135,7 +136,7 @@ export const analyzedFoodSchema = detectedFoodSchema.extend({
 });
 export type AnalyzedFood = z.infer<typeof analyzedFoodSchema>;
 
-/** Resposta de `POST /meals/analyze-image`. */
+/** Resposta de `POST /scan-prato`. */
 export const mealAnalysisResultSchema = z.object({
   analysisId: z.string().uuid(),
   isFood: z.boolean(),
@@ -158,18 +159,19 @@ export const mealAnalysisResultSchema = z.object({
     z.enum(['low_confidence', 'poor_image_quality', 'hidden_calories', 'no_match_in_database']),
   ),
   disclaimer: z.string(),
-  /** Milissegundos gastos na chamada ao provedor. Alimenta metricas de UX. */
+  /** Milissegundos gastos no servico de IA. Alimenta metricas de UX. */
   processingMs: z.number().int().nonnegative(),
 });
 export type MealAnalysisResult = z.infer<typeof mealAnalysisResultSchema>;
 
-/** Corpo de `POST /meals/analyze-image`. A imagem ja esta no Storage privado. */
-export const analyzeMealImageRequestSchema = z.object({
-  /** Caminho no bucket privado, ex.: "user-id/2026-09-10/uuid.jpg". */
-  storagePath: z.string().min(3).max(300),
-  /** Sobrescreve o palpite do modelo. O app envia com base no horario local. */
-  mealType: mealTypeSchema.nullish(),
+/**
+ * Campos de texto de `POST /scan-prato` (multipart/form-data). A foto vai no
+ * campo de arquivo `foto`; nao e armazenada.
+ */
+export const scanPratoFieldsSchema = z.object({
+  /** Tipo da refeicao pelo horario local (o app envia). Default: deduzido pela hora. */
+  mealType: mealTypeSchema.optional(),
   /** Contexto opcional digitado pelo usuario: "tinha molho branco". */
-  userHint: z.string().trim().max(200).nullish(),
+  userHint: z.string().trim().max(200).optional(),
 });
-export type AnalyzeMealImageRequest = z.infer<typeof analyzeMealImageRequestSchema>;
+export type ScanPratoFields = z.infer<typeof scanPratoFieldsSchema>;

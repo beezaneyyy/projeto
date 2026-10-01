@@ -73,65 +73,26 @@ export const mealPlanSchema = z.object({
 });
 export type MealPlan = z.infer<typeof mealPlanSchema>;
 
-/**
- * Output do modelo ao gerar o plano alimentar.
- *
- * Mesmo padrao da analise de foto: o modelo entrega composicao por 100 g e
- * gramatura; os totais de refeicao e de dia sao somados por nos. Um plano cujo
- * total nao bate com a meta e um bug visivel na primeira tela.
- */
-export const mealPlanModelOutputSchema = z.object({
-  name: z.string().trim().min(2).max(80),
-  rationale: z.string().trim().max(500),
-  days: z
-    .array(
-      z.object({
-        dayIndex: z.number().int().min(0).max(6),
-        meals: z
-          .array(
-            z.object({
-              mealType: mealTypeSchema,
-              name: z.string().trim().min(2).max(80),
-              suggestedTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
-              preparationTip: z.string().trim().max(300).nullish(),
-              items: z
-                .array(
-                  z.object({
-                    name: z.string().trim().min(2).max(120),
-                    canonicalName: z.string().regex(/^[a-z0-9_]+$/).max(60),
-                    grams: z.number().positive().max(5000),
-                    unit: measureUnitSchema,
-                    quantity: z.number().positive().max(5000),
-                    per100g: nutritionPer100Schema,
-                    preparationMethod: preparationMethodSchema,
-                  }),
-                )
-                .min(1)
-                .max(12),
-            }),
-          )
-          .min(2)
-          .max(8),
-      }),
-    )
-    .min(1)
-    .max(7),
-});
-export type MealPlanModelOutput = z.infer<typeof mealPlanModelOutputSchema>;
-
+/** Corpo de `POST /plano-alimentar/gerar`. O plano e montado por regras do core, na hora. */
 export const generateMealPlanRequestSchema = z.object({
-  /** Quantos dias gerar. 1 = so hoje (rapido e barato), 7 = semana completa. */
+  /** Quantos dias gerar a partir de hoje. 7 = semana completa. */
   days: z.number().int().min(1).max(7).default(7),
-  /** Regenera ignorando o plano ativo. */
+  /** Substitui o plano ativo (o anterior e arquivado). */
   force: z.boolean().default(false),
-  /** Pedido livre do usuario: "mais pratico", "sem repetir frango". */
-  instructions: z.string().trim().max(300).nullish(),
 });
 export type GenerateMealPlanRequest = z.infer<typeof generateMealPlanRequestSchema>;
 
+/** Corpo de `POST /plano-alimentar/refeicoes/:mealId/trocar`. */
 export const swapMealRequestSchema = z.object({
-  reason: z.string().trim().max(200).nullish(),
   /** Trava alimentos que o usuario quer manter na refeicao. */
   keepItemIds: z.array(z.string().uuid()).max(12).default([]),
 });
 export type SwapMealRequest = z.infer<typeof swapMealRequestSchema>;
+
+/** Corpo de `PUT /plano-alimentar/itens/:itemId`. Os totais sao recalculados pelo servidor. */
+export const updateMealPlanItemSchema = z.object({
+  quantity: z.number().positive().max(5000),
+  unit: measureUnitSchema,
+  grams: z.number().positive().max(5000),
+});
+export type UpdateMealPlanItemInput = z.infer<typeof updateMealPlanItemSchema>;
