@@ -56,9 +56,10 @@ export class ScanPratoService {
     const fallbackMealType = fields.mealType ?? suggestMealTypeByHour(localHour(this.now(), timezone));
     const imageSha256 = createHash('sha256').update(photo).digest('hex');
 
-    // Mesma foto, sem contexto novo: devolve a analise ja feita.
-    if (!fields.userHint) {
-      const previous = await this.repo.findLatestAnalysisForImage(userId, imageSha256);
+    // Mesma foto, sem contexto novo e mesmo modelo: devolve a analise ja feita.
+    const modelVersion = this.ia.currentModelVersion;
+    if (!fields.userHint && modelVersion) {
+      const previous = await this.repo.findLatestAnalysisForImage(userId, imageSha256, modelVersion);
       if (previous) return this.rebuild(userId, previous, fields.mealType ?? null, fallbackMealType);
     }
 

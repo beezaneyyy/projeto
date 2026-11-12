@@ -26,6 +26,7 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:ia": "node scripts/ia.mjs test",
+    "avaliar:ia": "node scripts/ia.mjs avaliar",
     "test:api": "npm run test --workspace @nutrisnap/api",
     "core:build": "npm run build --workspace @nutrisnap/core",
     "core:dev": "npm run dev --workspace @nutrisnap/core",

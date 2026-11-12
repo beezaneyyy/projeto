@@ -24,6 +24,12 @@ export interface IaCallResult {
  *     inclusive falhas - base da cota diaria e das metricas de qualidade.
  */
 export class IaService {
+  /**
+   * Versao do modelo vista na ultima resposta valida. O reuso de analise pelo
+   * hash da foto so vale para esta versao: modelo novo = analise nova.
+   */
+  private lastModelVersion: string | null = null;
+
   constructor(
     private readonly vision: VisionClient,
     private readonly prisma: PrismaClient,
@@ -52,6 +58,7 @@ export class IaService {
       }
 
       const latencyMs = this.now() - startedAt;
+      this.lastModelVersion = modelVersion;
       await this.record(userId, parsed.data.isFood ? 'success' : 'rejected_not_food', model, modelVersion, startedAt, null);
       return { output: parsed.data, provider: IA_PROVIDER, model, modelVersion, latencyMs };
     } catch (error) {
@@ -71,6 +78,11 @@ export class IaService {
         reason: error.kind,
       });
     }
+  }
+
+  /** null ate a primeira analise desde que a API subiu (sem reuso ate la). */
+  get currentModelVersion(): string | null {
+    return this.lastModelVersion;
   }
 
   /**

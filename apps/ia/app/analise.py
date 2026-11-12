@@ -11,6 +11,10 @@ Limitacoes conhecidas (e por que o app pede confirmacao):
  - Pratos com varios itens: classificamos a imagem inteira e recortes (grade
    2x2 + centro) e juntamos os rotulos mais fortes. Funciona para prato
    feito; nao separa ingredientes misturados (ex.: arroz com legumes).
+ - Itens parecidos competem: so fica o mais provavel de cada `exclusiveGroup`
+   da tabela (um arroz, um feijao, uma carne principal...). Um prato com duas
+   carnes diferentes perde uma delas - o usuario adiciona na confirmacao.
+ - Qualidade medida em apps/ia/avaliacao (npm run avaliar:ia).
 """
 
 from __future__ import annotations
@@ -46,8 +50,26 @@ MAX_ITENS = 5
 FATOR_INCERTEZA_PORCAO = 0.6
 
 
-def rotulos(alimentos: Sequence[Alimento]) -> list[str]:
-    return [f"a photo of {a.clip_prompt}" for a in alimentos] + [r for r, _ in NAO_COMIDA]
+def rotulos(alimentos: Sequence[Alimento]) -> list[list[str]]:
+    """Descricoes de cada rotulo, na ordem: alimentos da tabela e depois NAO_COMIDA."""
+    return [[f"a photo of {p}" for p in a.clip_prompts] for a in alimentos] + [[r] for r, _ in NAO_COMIDA]
+
+
+def um_por_grupo(candidatos: Sequence[tuple[int, float]], alimentos: Sequence[Alimento]) -> list[tuple[int, float]]:
+    """Mantem so o candidato mais forte de cada `exclusive_group` (ex.: um arroz, um feijao, uma carne).
+
+    `candidatos` vem ordenado do mais forte para o mais fraco.
+    """
+    vistos: set[str] = set()
+    saida = []
+    for i, score in candidatos:
+        grupo = alimentos[i].exclusive_group
+        if grupo is not None:
+            if grupo in vistos:
+                continue
+            vistos.add(grupo)
+        saida.append((i, score))
+    return saida
 
 
 @dataclass(frozen=True)
@@ -137,7 +159,8 @@ def analisar(img: Image.Image, alimentos: Sequence[Alimento], classificador: Cla
         if linha[i] >= LIMIAR_ITEM_RECORTE:
             pontuacao[i] = max(pontuacao.get(i, 0.0), float(linha[i]))
 
-    escolhidos = sorted(pontuacao.items(), key=lambda kv: -kv[1])[:MAX_ITENS]
+    ordenados = sorted(pontuacao.items(), key=lambda kv: -kv[1])
+    escolhidos = um_por_grupo(ordenados, alimentos)[:MAX_ITENS]
     itens = [alimentos[i] for i, _ in escolhidos]
     penalidade_qualidade = {"good": 1.0, "fair": 0.85, "poor": 0.6}[qualidade.nivel]
 

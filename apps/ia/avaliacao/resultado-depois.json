@@ -1,0 +1,526 @@
+{
+ "resumo": {
+  "fotos": 29,
+  "acerto": 0.88,
+  "precisao": 0.7538461538461538,
+  "falsos_positivos": 16,
+  "pratos_perfeitos": 17,
+  "rejeicoes_corretas": 29
+ },
+ "fotos": {
+  "01-prato-feito-em-bel-m.jpg": {
+   "detectados": [
+    "black_beans_cooked",
+    "tilapia_fillet_grilled",
+    "tapioca_crepe",
+    "farofa",
+    "white_rice_cooked"
+   ],
+   "grupos": 2,
+   "achados": 2,
+   "fp": [
+    "tapioca_crepe",
+    "farofa"
+   ],
+   "perdidos": [],
+   "perfeito": false,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "black_beans_cooked": 0.52,
+    "tilapia_fillet_grilled": 0.44,
+    "tapioca_crepe": 0.33,
+    "farofa": 0.31,
+    "white_rice_cooked": 0.22
+   }
+  },
+  "02-feijoada-brazilian-dish-s-o-lu-s-maranh.jpg": {
+   "detectados": [
+    "white_rice_cooked",
+    "farofa",
+    "couscous_cooked",
+    "whey_protein",
+    "black_beans_cooked"
+   ],
+   "grupos": 3,
+   "achados": 2,
+   "fp": [
+    "couscous_cooked",
+    "whey_protein"
+   ],
+   "perdidos": [
+    "orange_raw"
+   ],
+   "perfeito": false,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "white_rice_cooked": 0.57,
+    "farofa": 0.46,
+    "couscous_cooked": 0.29,
+    "whey_protein": 0.26,
+    "black_beans_cooked": 0.22
+   }
+  },
+  "03-feijoada-brasileira-1.jpg": {
+   "detectados": [
+    "feijoada"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "feijoada": 0.49
+   }
+  },
+  "04-feijoada-con-arroz-blanco-en-restaurante.jpg": {
+   "detectados": [
+    "white_rice_cooked",
+    "black_beans_cooked",
+    "cola_soda",
+    "milk_chocolate"
+   ],
+   "grupos": 2,
+   "achados": 2,
+   "fp": [
+    "cola_soda",
+    "milk_chocolate"
+   ],
+   "perdidos": [],
+   "perfeito": false,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "white_rice_cooked": 0.57,
+    "black_beans_cooked": 0.25,
+    "cola_soda": 0.19,
+    "milk_chocolate": 0.16
+   }
+  },
+  "05-arroz-feij-o-e-farofa.jpg": {
+   "detectados": [
+    "pinto_beans_cooked",
+    "white_rice_cooked",
+    "farofa"
+   ],
+   "grupos": 3,
+   "achados": 3,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "pinto_beans_cooked": 0.54,
+    "white_rice_cooked": 0.42,
+    "farofa": 0.2
+   }
+  },
+  "06-arroz-feij-o-e-peixe-grelhado.jpg": {
+   "detectados": [
+    "white_rice_cooked",
+    "pinto_beans_cooked"
+   ],
+   "grupos": 3,
+   "achados": 2,
+   "fp": [],
+   "perdidos": [
+    "tilapia_fillet_grilled"
+   ],
+   "perfeito": false,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "white_rice_cooked": 0.57,
+    "pinto_beans_cooked": 0.3
+   }
+  },
+  "07-arroz-e-feij-o.jpg": {
+   "detectados": [
+    "farofa",
+    "black_beans_cooked"
+   ],
+   "grupos": 2,
+   "achados": 1,
+   "fp": [
+    "farofa"
+   ],
+   "perdidos": [
+    "white_rice_cooked"
+   ],
+   "perfeito": false,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "farofa": 0.53,
+    "black_beans_cooked": 0.36
+   }
+  },
+  "08-arroz-feij-o-salada-frango-frito-e-ovo-f.jpg": {
+   "detectados": [
+    "lettuce_raw",
+    "tilapia_fillet_grilled",
+    "white_rice_cooked",
+    "plain_yogurt",
+    "pinto_beans_cooked"
+   ],
+   "grupos": 3,
+   "achados": 3,
+   "fp": [
+    "tilapia_fillet_grilled",
+    "plain_yogurt"
+   ],
+   "perdidos": [],
+   "perfeito": false,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "lettuce_raw": 0.57,
+    "tilapia_fillet_grilled": 0.45,
+    "white_rice_cooked": 0.39,
+    "plain_yogurt": 0.3,
+    "pinto_beans_cooked": 0.1
+   }
+  },
+  "09-pernil-arroz-e-feijao-6892496251.jpg": {
+   "detectados": [
+    "feijoada",
+    "white_rice_cooked",
+    "couscous_cooked",
+    "pork_loin_grilled"
+   ],
+   "grupos": 3,
+   "achados": 3,
+   "fp": [
+    "couscous_cooked"
+   ],
+   "perdidos": [],
+   "perfeito": false,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "feijoada": 0.46,
+    "white_rice_cooked": 0.33,
+    "couscous_cooked": 0.31,
+    "pork_loin_grilled": 0.28
+   }
+  },
+  "10-prato-com-arroz-e-feij-o-frango-grelhado.jpg": {
+   "detectados": [
+    "feijoada",
+    "chicken_breast_grilled",
+    "french_fries"
+   ],
+   "grupos": 4,
+   "achados": 2,
+   "fp": [
+    "feijoada"
+   ],
+   "perdidos": [
+    "white_rice_cooked",
+    "pinto_beans_cooked"
+   ],
+   "perfeito": false,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "feijoada": 0.48,
+    "chicken_breast_grilled": 0.4,
+    "french_fries": 0.29
+   }
+  },
+  "11-bife-a-parmegiana-com-arroz-e-batata-fri.jpg": {
+   "detectados": [
+    "white_rice_cooked",
+    "lasagna_beef",
+    "tapioca_crepe",
+    "chicken_breast_grilled"
+   ],
+   "grupos": 3,
+   "achados": 2,
+   "fp": [
+    "tapioca_crepe"
+   ],
+   "perdidos": [
+    "french_fries"
+   ],
+   "perfeito": false,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "white_rice_cooked": 0.57,
+    "lasagna_beef": 0.55,
+    "tapioca_crepe": 0.31,
+    "chicken_breast_grilled": 0.25
+   }
+  },
+  "12-bife-acebolado-na-casa-da-vi-31297898435.jpg": {
+   "detectados": [
+    "beef_steak_grilled"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "beef_steak_grilled": 0.55
+   }
+  },
+  "13-p-o-de-queijo-brazilian-cheese-bread.jpg": {
+   "detectados": [
+    "cheese_bread"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "cheese_bread": 0.57
+   }
+  },
+  "14-pao-de-queijo-brasil.jpg": {
+   "detectados": [
+    "cheese_bread",
+    "black_coffee"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "cheese_bread": 0.57,
+    "black_coffee": 0.46
+   }
+  },
+  "16-cuscuz-nordestino.jpg": {
+   "detectados": [
+    "couscous_cooked"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "couscous_cooked": 0.53
+   }
+  },
+  "17-meaty-lasagna-8of8-8736299782.jpg": {
+   "detectados": [
+    "lasagna_beef"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "lasagna_beef": 0.57
+   }
+  },
+  "18-scrambled-egg-on-plate.jpg": {
+   "detectados": [
+    "scrambled_eggs"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "scrambled_eggs": 0.57
+   }
+  },
+  "19-two-fried-eggs.jpg": {
+   "detectados": [
+    "egg_fried"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "egg_fried": 0.57
+   }
+  },
+  "20-grilled-tilapia-1.jpg": {
+   "detectados": [
+    "tilapia_fillet_grilled"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "tilapia_fillet_grilled": 0.57
+   }
+  },
+  "21-steak-and-fries.jpg": {
+   "detectados": [
+    "beef_steak_grilled",
+    "french_fries"
+   ],
+   "grupos": 2,
+   "achados": 2,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "beef_steak_grilled": 0.57,
+    "french_fries": 0.56
+   }
+  },
+  "22-monster-salad-flickr-moria.jpg": {
+   "detectados": [
+    "lettuce_raw"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "lettuce_raw": 0.57
+   }
+  },
+  "23-banana-oatmeal.jpg": {
+   "detectados": [
+    "cassava_boiled",
+    "rolled_oats",
+    "farofa"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [
+    "cassava_boiled",
+    "farofa"
+   ],
+   "perdidos": [],
+   "perfeito": false,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "cassava_boiled": 0.55,
+    "rolled_oats": 0.47,
+    "farofa": 0.19
+   }
+  },
+  "24-french-fries-and-fried-egg-side-by-side.jpg": {
+   "detectados": [
+    "french_fries",
+    "egg_fried"
+   ],
+   "grupos": 2,
+   "achados": 2,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "french_fries": 0.57,
+    "egg_fried": 0.57
+   }
+  },
+  "25-cheesebread.jpg": {
+   "detectados": [
+    "cheese_bread"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "cheese_bread": 0.57
+   }
+  },
+  "26-prato-usuario-lombo-batata-arroz.jpg": {
+   "detectados": [
+    "french_fries",
+    "pork_loin_grilled",
+    "feijoada",
+    "brown_rice_cooked",
+    "lettuce_raw"
+   ],
+   "grupos": 3,
+   "achados": 3,
+   "fp": [
+    "feijoada"
+   ],
+   "perdidos": [],
+   "perfeito": false,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "french_fries": 0.57,
+    "pork_loin_grilled": 0.57,
+    "feijoada": 0.35,
+    "brown_rice_cooked": 0.34,
+    "lettuce_raw": 0.23
+   }
+  },
+  "demo-1-banana.jpg": {
+   "detectados": [
+    "banana_raw"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "banana_raw": 0.57
+   }
+  },
+  "demo-2-batata-frita.jpg": {
+   "detectados": [
+    "french_fries"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "french_fries": 0.57
+   }
+  },
+  "demo-3-espaguete.jpg": {
+   "detectados": [
+    "pasta_cooked",
+    "carrot_raw"
+   ],
+   "grupos": 1,
+   "achados": 1,
+   "fp": [
+    "carrot_raw"
+   ],
+   "perdidos": [],
+   "perfeito": false,
+   "rejeicao_ok": true,
+   "confiancas": {
+    "pasta_cooked": 0.57,
+    "carrot_raw": 0.27
+   }
+  },
+  "demo-4-teclado.jpg": {
+   "detectados": [],
+   "grupos": 0,
+   "achados": 0,
+   "fp": [],
+   "perdidos": [],
+   "perfeito": true,
+   "rejeicao_ok": true,
+   "confiancas": {}
+  }
+ }
+}

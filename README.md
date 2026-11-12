@@ -46,6 +46,7 @@ Instale o que falta e confira cada item com o comando ao lado.
 | [ ] | **Docker** com Compose | Docker Desktop (Windows/macOS) ou Docker Engine + plugin compose (Linux) — [docker.com](https://www.docker.com/products/docker-desktop/) | Subir o banco PostgreSQL sem instalar nada | `docker compose version` |
 | [ ] | **Expo Go** no celular | versão atual da loja (o app usa **Expo SDK 57**) | Abrir o app no celular | Instale pela Play Store / App Store |
 | [ ] | Celular e computador **na mesma rede Wi-Fi** | — | O celular baixa o app do seu computador | — |
+| [ ] | *(opcional)* Android Studio | — | Só se quiser usar **emulador** em vez do celular | — |
 
 **Windows:** ao instalar o Python, marque **"Add python.exe to PATH"**.
 **Docker:** o Docker Desktop precisa estar **aberto** (ícone da baleia ativo) antes dos comandos.
@@ -180,7 +181,7 @@ Pronto quando aparecer: `Uvicorn running on http://127.0.0.1:8000`.
 **Verificar:** abra http://localhost:8000/health no navegador:
 
 ```json
-{"status":"ok","modelo":"openai/clip-vit-base-patch32","versao":"visao-clip@1"}
+{"status":"ok","modelo":"openai/clip-vit-base-patch32","versao":"visao-clip@2"}
 ```
 
 ---

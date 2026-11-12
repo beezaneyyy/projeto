@@ -68,10 +68,10 @@ export class DiarioRepository {
     });
   }
 
-  /** Analise anterior da mesma foto (mesmo hash): evita processar a imagem de novo. */
-  findLatestAnalysisForImage(userId: string, imageSha256: string): Promise<MealAnalysis | null> {
+  /** Analise anterior da mesma foto (mesmo hash) pela mesma versao do modelo: evita processar a imagem de novo. */
+  findLatestAnalysisForImage(userId: string, imageSha256: string, modelVersion: string): Promise<MealAnalysis | null> {
     return this.prisma.mealAnalysis.findFirst({
-      where: { userId, imageSha256 },
+      where: { userId, imageSha256, modelVersion },
       orderBy: { createdAt: 'desc' },
     });
   }

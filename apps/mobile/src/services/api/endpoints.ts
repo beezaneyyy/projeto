@@ -25,8 +25,6 @@ import { Platform } from 'react-native';
 
 import { apiRequest } from './client';
 
-import { File } from 'expo-file-system';
-
 /**
  * Uma funcao por rota da API (docs/03-api.md). As telas usam isto via
  * TanStack Query (`queries.ts`); nao chamam `apiRequest` direto.
@@ -84,8 +82,8 @@ export const scanApi = {
       const blob = await (await fetch(photo.uri)).blob();
       form.append('foto', blob, name);
     } else {
-      const file = new File(photo.uri as any);
-      form.append('foto', file);
+      // React Native: o FormData envia o arquivo a partir de { uri, name, type }.
+      form.append('foto', { uri: photo.uri, name, type } as unknown as Blob);
     }
 
     if (fields.mealType) form.append('mealType', fields.mealType);

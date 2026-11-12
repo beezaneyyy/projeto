@@ -17,7 +17,11 @@ class Alimento:
     default_grams: float
     min_grams: float
     max_grams: float
-    clip_prompt: str
+    # Descricoes em ingles para o CLIP. Varias por alimento: o embedding e a media delas.
+    clip_prompts: tuple[str, ...]
+    # Alimentos do mesmo grupo raramente aparecem juntos no prato (ex.: arroz branco x integral,
+    # feijao x feijoada): a analise mantem so o mais provavel de cada grupo.
+    exclusive_group: str | None = None
 
 
 def carregar_alimentos(path: Path) -> list[Alimento]:
@@ -32,7 +36,8 @@ def carregar_alimentos(path: Path) -> list[Alimento]:
             default_grams=float(f["portion"]["defaultGrams"]),
             min_grams=float(f["portion"]["minGrams"]),
             max_grams=float(f["portion"]["maxGrams"]),
-            clip_prompt=f["clipPrompt"],
+            clip_prompts=tuple(f["clipPrompts"]),
+            exclusive_group=f.get("exclusiveGroup"),
         )
         for f in data["foods"]
     ]

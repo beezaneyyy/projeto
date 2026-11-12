@@ -21,7 +21,7 @@ from .analise import analisar, rotulos
 from .classificador import Classificador, ClipClassificador
 from .config import Config, load_config
 
-VERSAO = "visao-clip@1"
+VERSAO = "visao-clip@2"
 FORMATOS = {"JPEG", "PNG", "WEBP"}
 # Protecao contra "bomba de descompressao": imagem pequena em bytes, gigante em pixels.
 Image.MAX_IMAGE_PIXELS = 40_000_000

@@ -6,8 +6,9 @@
  *   node scripts/ia.mjs setup   -> cria apps/ia/.venv e instala tudo (torch CPU incluso)
  *   node scripts/ia.mjs dev     -> sobe a IA em http://127.0.0.1:8000
  *   node scripts/ia.mjs test    -> roda os testes do servico de IA
+ *   node scripts/ia.mjs avaliar -> mede acertos da IA nas fotos de apps/ia/avaliacao
  *
- * Atalhos na raiz: npm run setup:ia | dev:ia | test:ia
+ * Atalhos na raiz: npm run setup:ia | dev:ia | test:ia | avaliar:ia
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
@@ -75,10 +76,13 @@ if (command === 'setup') {
   }
   console.log('> Subindo a IA em http://127.0.0.1:8000 (o 1o start baixa o modelo CLIP e demora alguns minutos)...');
   run(VENV_PYTHON, ['-m', 'uvicorn', 'app.main:app', '--env-file', '.env', '--host', '127.0.0.1', '--port', '8000']);
+} else if (command === 'avaliar') {
+  requireVenv();
+  run(VENV_PYTHON, ['avaliacao/avaliar.py', ...process.argv.slice(3)]);
 } else if (command === 'test') {
   requireVenv();
   run(VENV_PYTHON, ['-m', 'pytest', '-q']);
 } else {
-  console.error('Uso: node scripts/ia.mjs <setup|dev|test>');
+  console.error('Uso: node scripts/ia.mjs <setup|dev|test|avaliar>');
   process.exit(1);
 }

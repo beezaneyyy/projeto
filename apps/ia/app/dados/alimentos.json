@@ -19,7 +19,12 @@
     "minGrams": 80,
     "maxGrams": 250
    },
-   "clipPrompt": "white rice",
+   "clipPrompts": [
+    "white rice",
+    "a serving of plain cooked white rice",
+    "fluffy white rice"
+   ],
+   "exclusiveGroup": "rice",
    "tags": [],
    "servings": [
     {
@@ -49,7 +54,11 @@
     "minGrams": 80,
     "maxGrams": 250
    },
-   "clipPrompt": "brown rice",
+   "clipPrompts": [
+    "brown rice",
+    "cooked whole grain brown rice with brown grains"
+   ],
+   "exclusiveGroup": "rice",
    "tags": [],
    "servings": []
   },
@@ -71,7 +80,12 @@
     "minGrams": 60,
     "maxGrams": 180
    },
-   "clipPrompt": "brown beans stew",
+   "clipPrompts": [
+    "brown beans stew",
+    "Brazilian brown pinto beans in broth",
+    "a bowl of cooked pinto beans"
+   ],
+   "exclusiveGroup": "beans",
    "tags": [
     "legume"
    ],
@@ -103,7 +117,12 @@
     "minGrams": 60,
     "maxGrams": 180
    },
-   "clipPrompt": "black beans stew",
+   "clipPrompts": [
+    "black beans stew",
+    "Brazilian black beans in dark broth",
+    "a bowl of cooked black beans"
+   ],
+   "exclusiveGroup": "beans",
    "tags": [
     "legume"
    ],
@@ -135,7 +154,11 @@
     "minGrams": 60,
     "maxGrams": 180
    },
-   "clipPrompt": "cooked lentils",
+   "clipPrompts": [
+    "cooked lentils",
+    "lentil stew"
+   ],
+   "exclusiveGroup": "beans",
    "tags": [
     "legume"
    ],
@@ -159,7 +182,11 @@
     "minGrams": 80,
     "maxGrams": 200
    },
-   "clipPrompt": "grilled chicken breast",
+   "clipPrompts": [
+    "grilled chicken breast",
+    "a grilled chicken fillet"
+   ],
+   "exclusiveGroup": "main_protein",
    "tags": [
     "animal",
     "meat"
@@ -192,7 +219,11 @@
     "minGrams": 80,
     "maxGrams": 200
    },
-   "clipPrompt": "roasted chicken thigh",
+   "clipPrompts": [
+    "roasted chicken thigh",
+    "roast chicken leg with crispy skin"
+   ],
+   "exclusiveGroup": "main_protein",
    "tags": [
     "animal",
     "meat"
@@ -217,7 +248,12 @@
     "minGrams": 80,
     "maxGrams": 200
    },
-   "clipPrompt": "grilled beef steak",
+   "clipPrompts": [
+    "grilled beef steak",
+    "a slice of red meat steak",
+    "beef with onions"
+   ],
+   "exclusiveGroup": "main_protein",
    "tags": [
     "animal",
     "meat"
@@ -242,7 +278,11 @@
     "minGrams": 70,
     "maxGrams": 180
    },
-   "clipPrompt": "ground beef",
+   "clipPrompts": [
+    "ground beef",
+    "cooked minced meat"
+   ],
+   "exclusiveGroup": "main_protein",
    "tags": [
     "animal",
     "meat"
@@ -267,7 +307,12 @@
     "minGrams": 80,
     "maxGrams": 200
    },
-   "clipPrompt": "grilled pork loin",
+   "clipPrompts": [
+    "grilled pork loin",
+    "sliced roast pork",
+    "shredded roast pork"
+   ],
+   "exclusiveGroup": "main_protein",
    "tags": [
     "animal",
     "meat",
@@ -293,7 +338,12 @@
     "minGrams": 80,
     "maxGrams": 200
    },
-   "clipPrompt": "grilled fish fillet",
+   "clipPrompts": [
+    "grilled fish fillet",
+    "a whole grilled fish",
+    "fried fish"
+   ],
+   "exclusiveGroup": "main_protein",
    "tags": [
     "animal",
     "fish"
@@ -318,7 +368,11 @@
     "minGrams": 50,
     "maxGrams": 120
    },
-   "clipPrompt": "canned tuna",
+   "clipPrompts": [
+    "canned tuna",
+    "flaked tuna from a can"
+   ],
+   "exclusiveGroup": "main_protein",
    "tags": [
     "animal",
     "fish"
@@ -343,7 +397,11 @@
     "minGrams": 80,
     "maxGrams": 200
    },
-   "clipPrompt": "grilled tofu",
+   "clipPrompts": [
+    "grilled tofu",
+    "tofu cubes"
+   ],
+   "exclusiveGroup": "main_protein",
    "tags": [
     "soy"
    ],
@@ -367,7 +425,11 @@
     "minGrams": 50,
     "maxGrams": 150
    },
-   "clipPrompt": "boiled eggs",
+   "clipPrompts": [
+    "boiled eggs",
+    "hard boiled eggs cut in half"
+   ],
+   "exclusiveGroup": "egg",
    "tags": [
     "animal",
     "egg"
@@ -400,7 +462,11 @@
     "minGrams": 50,
     "maxGrams": 100
    },
-   "clipPrompt": "fried egg",
+   "clipPrompts": [
+    "fried egg",
+    "a fried egg sunny side up with yolk"
+   ],
+   "exclusiveGroup": "egg",
    "tags": [
     "animal",
     "egg"
@@ -433,7 +499,10 @@
     "minGrams": 50,
     "maxGrams": 150
    },
-   "clipPrompt": "scrambled eggs",
+   "clipPrompts": [
+    "scrambled eggs"
+   ],
+   "exclusiveGroup": "egg",
    "tags": [
     "animal",
     "egg"
@@ -458,7 +527,11 @@
     "minGrams": 50,
     "maxGrams": 100
    },
-   "clipPrompt": "bread roll",
+   "clipPrompts": [
+    "bread roll",
+    "a French bread roll with crust"
+   ],
+   "exclusiveGroup": "bread",
    "tags": [
     "gluten"
    ],
@@ -490,7 +563,11 @@
     "minGrams": 25,
     "maxGrams": 75
    },
-   "clipPrompt": "whole wheat bread slices",
+   "clipPrompts": [
+    "whole wheat bread slices",
+    "sliced brown sandwich bread"
+   ],
+   "exclusiveGroup": "bread",
    "tags": [
     "gluten"
    ],
@@ -522,7 +599,11 @@
     "minGrams": 20,
     "maxGrams": 120
    },
-   "clipPrompt": "cheese bread balls",
+   "clipPrompts": [
+    "cheese bread balls",
+    "Brazilian pao de queijo cheese buns"
+   ],
+   "exclusiveGroup": "bread",
    "tags": [
     "animal",
     "dairy",
@@ -549,7 +630,11 @@
     "minGrams": 40,
     "maxGrams": 100
    },
-   "clipPrompt": "tapioca crepe",
+   "clipPrompts": [
+    "tapioca crepe",
+    "a folded white Brazilian tapioca crepe with filling"
+   ],
+   "exclusiveGroup": "bread",
    "tags": [],
    "servings": []
   },
@@ -571,7 +656,10 @@
     "minGrams": 80,
     "maxGrams": 200
    },
-   "clipPrompt": "corn couscous",
+   "clipPrompts": [
+    "corn couscous",
+    "Brazilian yellow cornmeal cuscuz"
+   ],
    "tags": [],
    "servings": []
   },
@@ -593,7 +681,10 @@
     "minGrams": 100,
     "maxGrams": 250
    },
-   "clipPrompt": "spaghetti pasta",
+   "clipPrompts": [
+    "spaghetti pasta",
+    "a plate of cooked pasta noodles"
+   ],
    "tags": [
     "gluten"
    ],
@@ -617,7 +708,10 @@
     "minGrams": 15,
     "maxGrams": 60
    },
-   "clipPrompt": "oatmeal",
+   "clipPrompts": [
+    "oatmeal",
+    "a bowl of oat porridge"
+   ],
    "tags": [
     "gluten"
    ],
@@ -649,7 +743,11 @@
     "minGrams": 80,
     "maxGrams": 250
    },
-   "clipPrompt": "boiled potatoes",
+   "clipPrompts": [
+    "boiled potatoes",
+    "boiled potato chunks"
+   ],
+   "exclusiveGroup": "potato",
    "tags": [],
    "servings": []
   },
@@ -671,7 +769,12 @@
     "minGrams": 60,
     "maxGrams": 180
    },
-   "clipPrompt": "french fries",
+   "clipPrompts": [
+    "french fries",
+    "fried potato wedges",
+    "a portion of crispy fries"
+   ],
+   "exclusiveGroup": "potato",
    "tags": [],
    "servings": []
   },
@@ -693,7 +796,11 @@
     "minGrams": 80,
     "maxGrams": 250
    },
-   "clipPrompt": "sweet potato",
+   "clipPrompts": [
+    "sweet potato",
+    "boiled orange sweet potato pieces"
+   ],
+   "exclusiveGroup": "potato",
    "tags": [],
    "servings": []
   },
@@ -715,7 +822,11 @@
     "minGrams": 80,
     "maxGrams": 200
    },
-   "clipPrompt": "boiled cassava",
+   "clipPrompts": [
+    "boiled cassava",
+    "boiled white cassava root pieces"
+   ],
+   "exclusiveGroup": "potato",
    "tags": [],
    "servings": []
   },
@@ -737,7 +848,10 @@
     "minGrams": 20,
     "maxGrams": 80
    },
-   "clipPrompt": "lettuce salad",
+   "clipPrompts": [
+    "lettuce salad",
+    "green leaf salad with lettuce"
+   ],
    "tags": [],
    "servings": []
   },
@@ -759,7 +873,10 @@
     "minGrams": 30,
     "maxGrams": 120
    },
-   "clipPrompt": "sliced tomatoes",
+   "clipPrompts": [
+    "sliced tomatoes",
+    "red tomato slices"
+   ],
    "tags": [],
    "servings": []
   },
@@ -781,7 +898,10 @@
     "minGrams": 40,
     "maxGrams": 150
    },
-   "clipPrompt": "broccoli",
+   "clipPrompts": [
+    "broccoli",
+    "cooked broccoli florets"
+   ],
    "tags": [],
    "servings": []
   },
@@ -803,7 +923,10 @@
     "minGrams": 30,
     "maxGrams": 100
    },
-   "clipPrompt": "grated carrot",
+   "clipPrompts": [
+    "grated carrot",
+    "shredded orange carrot salad"
+   ],
    "tags": [],
    "servings": []
   },
@@ -825,7 +948,10 @@
     "minGrams": 50,
     "maxGrams": 140
    },
-   "clipPrompt": "banana",
+   "clipPrompts": [
+    "banana",
+    "yellow bananas"
+   ],
    "tags": [],
    "servings": [
     {
@@ -855,7 +981,10 @@
     "minGrams": 100,
     "maxGrams": 200
    },
-   "clipPrompt": "apple",
+   "clipPrompts": [
+    "apple",
+    "a red apple"
+   ],
    "tags": [],
    "servings": [
     {
@@ -885,7 +1014,10 @@
     "minGrams": 100,
     "maxGrams": 300
    },
-   "clipPrompt": "papaya",
+   "clipPrompts": [
+    "papaya",
+    "sliced orange papaya with black seeds"
+   ],
    "tags": [],
    "servings": []
   },
@@ -907,7 +1039,10 @@
     "minGrams": 100,
     "maxGrams": 250
    },
-   "clipPrompt": "orange fruit",
+   "clipPrompts": [
+    "orange fruit",
+    "orange slices"
+   ],
    "tags": [],
    "servings": []
   },
@@ -929,7 +1064,10 @@
     "minGrams": 50,
     "maxGrams": 200
    },
-   "clipPrompt": "avocado",
+   "clipPrompts": [
+    "avocado",
+    "a halved green avocado"
+   ],
    "tags": [],
    "servings": []
   },
@@ -951,7 +1089,9 @@
     "minGrams": 100,
     "maxGrams": 300
    },
-   "clipPrompt": "glass of milk",
+   "clipPrompts": [
+    "glass of milk"
+   ],
    "tags": [
     "animal",
     "dairy",
@@ -985,7 +1125,10 @@
     "minGrams": 100,
     "maxGrams": 250
    },
-   "clipPrompt": "yogurt",
+   "clipPrompts": [
+    "yogurt",
+    "a bowl of white yogurt"
+   ],
    "tags": [
     "animal",
     "dairy",
@@ -1011,7 +1154,11 @@
     "minGrams": 20,
     "maxGrams": 60
    },
-   "clipPrompt": "white fresh cheese",
+   "clipPrompts": [
+    "white fresh cheese",
+    "a slice of white Minas fresh cheese"
+   ],
+   "exclusiveGroup": "cheese",
    "tags": [
     "animal",
     "dairy",
@@ -1045,7 +1192,11 @@
     "minGrams": 20,
     "maxGrams": 60
    },
-   "clipPrompt": "mozzarella cheese",
+   "clipPrompts": [
+    "mozzarella cheese",
+    "slices of yellow mozzarella cheese"
+   ],
+   "exclusiveGroup": "cheese",
    "tags": [
     "animal",
     "dairy",
@@ -1071,7 +1222,10 @@
     "minGrams": 5,
     "maxGrams": 15
    },
-   "clipPrompt": "olive oil",
+   "clipPrompts": [
+    "olive oil",
+    "a bottle of olive oil"
+   ],
    "tags": [],
    "servings": [
     {
@@ -1101,7 +1255,10 @@
     "minGrams": 5,
     "maxGrams": 20
    },
-   "clipPrompt": "butter",
+   "clipPrompts": [
+    "butter",
+    "a pat of butter"
+   ],
    "tags": [
     "animal",
     "dairy",
@@ -1127,7 +1284,10 @@
     "minGrams": 10,
     "maxGrams": 40
    },
-   "clipPrompt": "peanut butter",
+   "clipPrompts": [
+    "peanut butter",
+    "a jar of peanut butter"
+   ],
    "tags": [
     "nuts"
    ],
@@ -1151,7 +1311,10 @@
     "minGrams": 15,
     "maxGrams": 60
    },
-   "clipPrompt": "toasted cassava flour farofa",
+   "clipPrompts": [
+    "toasted cassava flour farofa",
+    "Brazilian farofa, golden toasted manioc flour crumbs"
+   ],
    "tags": [],
    "servings": []
   },
@@ -1173,7 +1336,10 @@
     "minGrams": 30,
     "maxGrams": 60
    },
-   "clipPrompt": "protein shake",
+   "clipPrompts": [
+    "protein shake",
+    "protein powder shake in a shaker bottle"
+   ],
    "tags": [
     "animal",
     "dairy",
@@ -1207,7 +1373,9 @@
     "minGrams": 50,
     "maxGrams": 200
    },
-   "clipPrompt": "cup of black coffee",
+   "clipPrompts": [
+    "cup of black coffee"
+   ],
    "tags": [],
    "servings": []
   },
@@ -1229,7 +1397,9 @@
     "minGrams": 200,
     "maxGrams": 400
    },
-   "clipPrompt": "glass of orange juice",
+   "clipPrompts": [
+    "glass of orange juice"
+   ],
    "tags": [],
    "servings": []
   },
@@ -1251,7 +1421,10 @@
     "minGrams": 200,
     "maxGrams": 600
    },
-   "clipPrompt": "glass of cola soda",
+   "clipPrompts": [
+    "glass of cola soda",
+    "a can of cola"
+   ],
    "tags": [
     "sugary"
    ],
@@ -1275,7 +1448,11 @@
     "minGrams": 150,
     "maxGrams": 400
    },
-   "clipPrompt": "feijoada black bean and pork stew",
+   "clipPrompts": [
+    "feijoada black bean and pork stew",
+    "Brazilian feijoada stew with sausage and pork pieces in black beans"
+   ],
+   "exclusiveGroup": "beans",
    "tags": [
     "animal",
     "meat",
@@ -1302,7 +1479,10 @@
     "minGrams": 200,
     "maxGrams": 450
    },
-   "clipPrompt": "lasagna",
+   "clipPrompts": [
+    "lasagna",
+    "a slice of baked lasagna with melted cheese"
+   ],
    "tags": [
     "animal",
     "meat",
@@ -1331,7 +1511,10 @@
     "minGrams": 10,
     "maxGrams": 60
    },
-   "clipPrompt": "chocolate bar",
+   "clipPrompts": [
+    "chocolate bar",
+    "pieces of milk chocolate bar"
+   ],
    "tags": [
     "animal",
     "dairy",

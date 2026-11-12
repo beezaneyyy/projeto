@@ -1,0 +1,122 @@
+{
+  "_comment": "Gabarito do conjunto de avaliacao. 'esperados': lista de grupos; cada grupo e um item do prato e vale se QUALQUER nome do grupo for detectado (ex.: frango grelhado OU assado). 'aceitaveis': itens que aparecem na foto mas sao pequenos/secundarios - detectar nao conta como erro, nao detectar tambem nao. Qualquer outro item detectado conta como falso positivo. 'comida': false = a IA deve rejeitar a foto.",
+  "fotos": {
+    "01-prato-feito-em-bel-m.jpg": {
+      "esperados": [["white_rice_cooked"], ["black_beans_cooked"]],
+      "aceitaveis": ["tomato_raw", "carrot_raw", "lettuce_raw", "tilapia_fillet_grilled"]
+    },
+    "02-feijoada-brazilian-dish-s-o-lu-s-maranh.jpg": {
+      "esperados": [["feijoada", "black_beans_cooked"], ["white_rice_cooked"], ["orange_raw"]],
+      "aceitaveis": ["farofa", "broccoli_boiled"]
+    },
+    "03-feijoada-brasileira-1.jpg": {
+      "esperados": [["feijoada", "black_beans_cooked"]],
+      "aceitaveis": []
+    },
+    "04-feijoada-con-arroz-blanco-en-restaurante.jpg": {
+      "esperados": [["white_rice_cooked"], ["feijoada", "black_beans_cooked"]],
+      "aceitaveis": []
+    },
+    "05-arroz-feij-o-e-farofa.jpg": {
+      "esperados": [["white_rice_cooked"], ["pinto_beans_cooked"], ["farofa"]],
+      "aceitaveis": []
+    },
+    "06-arroz-feij-o-e-peixe-grelhado.jpg": {
+      "esperados": [["white_rice_cooked"], ["pinto_beans_cooked"], ["tilapia_fillet_grilled"]],
+      "aceitaveis": []
+    },
+    "07-arroz-e-feij-o.jpg": {
+      "esperados": [["white_rice_cooked"], ["black_beans_cooked"]],
+      "aceitaveis": []
+    },
+    "08-arroz-feij-o-salada-frango-frito-e-ovo-f.jpg": {
+      "esperados": [["white_rice_cooked"], ["pinto_beans_cooked"], ["lettuce_raw"]],
+      "aceitaveis": ["tomato_raw", "chicken_thigh_roasted", "chicken_breast_grilled", "egg_fried"]
+    },
+    "09-pernil-arroz-e-feijao-6892496251.jpg": {
+      "esperados": [["white_rice_cooked"], ["black_beans_cooked", "feijoada"], ["pork_loin_grilled", "ground_beef_cooked", "beef_steak_grilled"]],
+      "aceitaveis": ["farofa", "carrot_raw"]
+    },
+    "10-prato-com-arroz-e-feij-o-frango-grelhado.jpg": {
+      "esperados": [["white_rice_cooked"], ["pinto_beans_cooked"], ["chicken_breast_grilled", "chicken_thigh_roasted"], ["french_fries"]],
+      "aceitaveis": ["lettuce_raw", "tomato_raw", "egg_fried", "carrot_raw"]
+    },
+    "11-bife-a-parmegiana-com-arroz-e-batata-fri.jpg": {
+      "esperados": [["beef_steak_grilled", "chicken_breast_grilled"], ["white_rice_cooked"], ["french_fries"]],
+      "aceitaveis": ["mozzarella_cheese", "tomato_raw", "lasagna_beef"]
+    },
+    "12-bife-acebolado-na-casa-da-vi-31297898435.jpg": {
+      "esperados": [["beef_steak_grilled", "ground_beef_cooked"]],
+      "aceitaveis": ["pork_loin_grilled"]
+    },
+    "13-p-o-de-queijo-brazilian-cheese-bread.jpg": {
+      "esperados": [["cheese_bread"]],
+      "aceitaveis": []
+    },
+    "14-pao-de-queijo-brasil.jpg": {
+      "esperados": [["cheese_bread"]],
+      "aceitaveis": ["black_coffee"]
+    },
+    "16-cuscuz-nordestino.jpg": {
+      "esperados": [["couscous_cooked"]],
+      "aceitaveis": []
+    },
+    "17-meaty-lasagna-8of8-8736299782.jpg": {
+      "esperados": [["lasagna_beef"]],
+      "aceitaveis": []
+    },
+    "18-scrambled-egg-on-plate.jpg": {
+      "esperados": [["scrambled_eggs"]],
+      "aceitaveis": []
+    },
+    "19-two-fried-eggs.jpg": {
+      "esperados": [["egg_fried"]],
+      "aceitaveis": []
+    },
+    "20-grilled-tilapia-1.jpg": {
+      "esperados": [["tilapia_fillet_grilled"]],
+      "aceitaveis": ["tomato_raw"]
+    },
+    "21-steak-and-fries.jpg": {
+      "esperados": [["beef_steak_grilled"], ["french_fries"]],
+      "aceitaveis": []
+    },
+    "22-monster-salad-flickr-moria.jpg": {
+      "esperados": [["lettuce_raw"]],
+      "aceitaveis": ["tomato_raw", "avocado_raw", "carrot_raw"]
+    },
+    "23-banana-oatmeal.jpg": {
+      "esperados": [["rolled_oats"]],
+      "aceitaveis": ["banana_raw", "plain_yogurt"]
+    },
+    "24-french-fries-and-fried-egg-side-by-side.jpg": {
+      "esperados": [["french_fries"], ["egg_fried"]],
+      "aceitaveis": []
+    },
+    "25-cheesebread.jpg": {
+      "esperados": [["cheese_bread"]],
+      "aceitaveis": []
+    },
+    "26-prato-usuario-lombo-batata-arroz.jpg": {
+      "esperados": [["pork_loin_grilled", "chicken_breast_grilled", "chicken_thigh_roasted"], ["french_fries", "potato_boiled"], ["white_rice_cooked", "brown_rice_cooked"]],
+      "aceitaveis": ["black_beans_cooked", "pinto_beans_cooked", "lettuce_raw", "tomato_raw"]
+    },
+    "demo-1-banana.jpg": {
+      "esperados": [["banana_raw"]],
+      "aceitaveis": []
+    },
+    "demo-2-batata-frita.jpg": {
+      "esperados": [["french_fries"]],
+      "aceitaveis": []
+    },
+    "demo-3-espaguete.jpg": {
+      "esperados": [["pasta_cooked"]],
+      "aceitaveis": ["ground_beef_cooked", "mozzarella_cheese", "lasagna_beef"]
+    },
+    "demo-4-teclado.jpg": {
+      "comida": false,
+      "esperados": [],
+      "aceitaveis": []
+    }
+  }
+}

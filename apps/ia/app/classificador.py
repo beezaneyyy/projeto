@@ -3,8 +3,8 @@
 `Classificador` e a porta: recebe imagens e uma lista fixa de rotulos e devolve
 a probabilidade de cada rotulo por imagem. A implementacao real usa CLIP em
 modo zero-shot - nao foi treinado em comida brasileira especificamente, mas
-compara a imagem com descricoes em texto ("a photo of white rice"), o que
-permite usar os rotulos da NOSSA tabela sem treinar um modelo.
+compara a imagem com descricoes em texto ("a photo of white rice"; varias por
+alimento, com media dos embeddings), o que permite usar os rotulos da NOSSA tabela sem treinar um modelo.
 
 Os testes usam um classificador falso; o modelo real so e carregado em
 producao/desenvolvimento.
@@ -27,7 +27,8 @@ class Classificador(Protocol):
 
 
 class ClipClassificador:
-    def __init__(self, model_name: str, rotulos: Sequence[str]) -> None:
+    def __init__(self, model_name: str, rotulos: Sequence[Sequence[str]]) -> None:
+        """`rotulos`: uma lista de descricoes por rotulo; o embedding do rotulo e a media delas."""
         import torch
         from transformers import CLIPModel, CLIPProcessor
 
@@ -37,8 +38,13 @@ class ClipClassificador:
         self._processor = CLIPProcessor.from_pretrained(model_name)
         # Embeddings de texto sao fixos: calculados uma vez na subida.
         with torch.no_grad():
-            tokens = self._processor(text=list(rotulos), return_tensors="pt", padding=True)
-            texto = _features(self._model.get_text_features(**tokens))
+            medias = []
+            for descricoes in rotulos:
+                tokens = self._processor(text=list(descricoes), return_tensors="pt", padding=True)
+                texto = _features(self._model.get_text_features(**tokens))
+                texto = texto / texto.norm(dim=-1, keepdim=True)
+                medias.append(texto.mean(dim=0))
+            texto = torch.stack(medias)
             self._texto = texto / texto.norm(dim=-1, keepdim=True)
         self._escala = self._model.logit_scale.exp()
 

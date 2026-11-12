@@ -45,7 +45,8 @@ Todos rodam a partir da raiz do repositório.
 | `npm run typecheck` | `tsc --noEmit` em todos os workspaces (ver observação do mobile abaixo) |
 | `npm run core:test` | Testes do domínio (141) |
 | `npm run test:api` | Testes da API (unitários sempre; integração só com `TEST_DATABASE_URL`) |
-| `npm run test:ia` | Testes do serviço Python (12, com classificador falso — não baixa modelo) |
+| `npm run test:ia` | Testes do serviço Python (14, com classificador falso — não baixa modelo) |
+| `npm run avaliar:ia` | Mede a IA real nas fotos rotuladas de `apps/ia/avaliacao/` (acerto, precisão, itens inventados) |
 
 Scripts do workspace da API (`npm run <script> --workspace @nutrisnap/api`): `dev`, `build`, `start` (roda `dist/` com `.env`), `typecheck`, `test`, `prisma:generate`, `prisma:migrate` (`migrate dev`), `prisma:deploy`, `prisma:studio`, `prisma:validate`, `db:seed`, `db:setup`.
 
@@ -106,6 +107,8 @@ Sem `TEST_DATABASE_URL`, os testes de integração aparecem como **skipped** (n�
 
 - Modelo: `openai/clip-vit-base-patch32` (zero-shot), baixado no 1º start (~581 MB medidos) para o cache do Hugging Face (`~/.cache/huggingface`; mude com `HF_HOME`).
 - Medições (Linux, 8 núcleos, CPU): 1º start com download ~80 s; start com cache ~6 s; RAM ~0,4 GB parado e ~0,5 GB após análises; ~0,4–1,5 s por foto.
+- **Medir antes de mudar:** `npm run avaliar:ia -- --salvar avaliacao/antes.json`, faça a mudança, depois `npm run avaliar:ia -- --comparar avaliacao/antes.json`. Gabarito em `apps/ia/avaliacao/rotulos.json` (para incluir uma foto: coloque em `avaliacao/fotos/` e adicione os itens esperados). Resultado atual (29 fotos): acerto 88%, precisão 75%, 17/29 pratos perfeitos — antes das descrições múltiplas e dos grupos exclusivos era 80% / 59% / 11.
+- Cada alimento tem `clipPrompts` (várias descrições em inglês; o CLIP usa a média) e, opcionalmente, `exclusiveGroup` (só o mais provável de cada grupo entra no resultado: um arroz, um feijão, uma carne principal...).
 - Para adicionar/alterar alimentos: edite `apps/ia/app/dados/alimentos.json` (o teste `test_tabela_respeita_faixas_do_contrato` confere faixas e Atwater), reinicie a IA e rode `npm run db:setup` para levar a mudança ao banco.
 - Rodar manualmente (sem os scripts): dentro de `apps/ia`, `.venv/bin/python -m uvicorn app.main:app --env-file .env --port 8000` (Windows: `.venv\Scripts\python.exe -m uvicorn ...`).
 

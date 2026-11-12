@@ -155,3 +155,24 @@ def test_tabela_respeita_faixas_do_contrato():
         # Atwater: kcal declaradas proximas de 4P + 4C + 9G (tolerancia larga: fibra, alcool, arredondamento).
         atwater = 4 * p["protein"] + 4 * p["carbs"] + 9 * p["fat"]
         assert abs(atwater - p["calories"]) <= max(25, 0.2 * p["calories"]), a.canonical_name
+
+
+def test_itens_do_mesmo_grupo_nao_aparecem_juntos():
+    """Arroz branco x integral e feijao x feijoada competem: fica so o mais provavel de cada grupo."""
+    pesos = {
+        IDX["white_rice_cooked"]: 0.35,
+        IDX["brown_rice_cooked"]: 0.2,
+        IDX["pinto_beans_cooked"]: 0.25,
+        IDX["feijoada"]: 0.18,
+        IDX["french_fries"]: 0.16,
+    }
+    with client_com(pesos) as client:
+        res = enviar(client, foto()).json()["resultado"]
+    nomes = [f["canonicalName"] for f in res["foods"]]
+    assert "white_rice_cooked" in nomes and "brown_rice_cooked" not in nomes
+    assert "pinto_beans_cooked" in nomes and "feijoada" not in nomes
+
+
+def test_tabela_tem_descricoes_para_o_clip():
+    for a in ALIMENTOS:
+        assert a.clip_prompts and all(p.strip() for p in a.clip_prompts), a.canonical_name
